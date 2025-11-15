@@ -17,18 +17,21 @@ module.exports = async (req, res) => {
         // IP adresini request'ten al (Vercel proxy'leri için)
         const forwarded = req.headers['x-forwarded-for'];
         const realIp = req.headers['x-real-ip'];
-        const ip = forwarded ? forwarded.split(',')[0].trim() : (realIp || req.socket?.remoteAddress || req.connection?.remoteAddress || 'unknown');
+        const cfConnectingIp = req.headers['cf-connecting-ip']; // Cloudflare için
+        const ip = cfConnectingIp || (forwarded ? forwarded.split(',')[0].trim() : null) || realIp || req.socket?.remoteAddress || req.connection?.remoteAddress || 'unknown';
         
         // Browser bilgilerini al
-        const userAgent = req.query.userAgent || req.headers['user-agent'] || 'unknown';
+        const userAgent = req.headers['user-agent'] || 'unknown';
         
         // Unique user identifier - IP + Browser
         const userFingerprint = `${ip}-${userAgent.substring(0, 50)}`;
         
         const now = new Date();
         
+        console.log('💓 Heartbeat alındı - IP:', ip, 'UserAgent:', userAgent.substring(0, 30));
+        
         // Kullanıcı aktivitesini kaydet/güncelle (IP ile)
-        await db.collection('userSessions').updateOne(
+        const result = await db.collection('userSessions').updateOne(
             { userFingerprint: userFingerprint },
             {
                 $set: {
@@ -49,6 +52,8 @@ module.exports = async (req, res) => {
             { upsert: true }
         );
         
+        console.log('✅ Heartbeat kaydedildi - MongoDB:', result.modifiedCount > 0 ? 'güncellendi' : 'yeni kayıt');
+        
         // Response gönder - OK dönerse kullanıcı online
         return res.status(200).json({ 
             success: true, 
@@ -59,7 +64,11 @@ module.exports = async (req, res) => {
             message: 'Heartbeat OK - User online'
         });
     } catch (error) {
-        console.error('Heartbeat GET error:', error);
-        return res.status(500).json({ error: 'Sunucu hatası', status: 'error' });
+        console.error('❌ Heartbeat GET error:', error);
+        return res.status(500).json({ 
+            error: 'Sunucu hatası', 
+            status: 'error',
+            message: error.message 
+        });
     }
 };

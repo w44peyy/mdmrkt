@@ -188,24 +188,28 @@ async function sendHeartbeat() {
         // GET isteği at - IP adresi otomatik olarak request'ten alınır
         // Network tab'ında /api/heartbeat görünecek
         const timestamp = Date.now();
-        const userAgent = encodeURIComponent(navigator.userAgent);
-        const heartbeatUrl = `/api/heartbeat?t=${timestamp}&ua=${userAgent}`;
+        const heartbeatUrl = `/api/heartbeat?t=${timestamp}&r=${Math.random()}`;
+        
+        console.log('🔄 Heartbeat gönderiliyor...', heartbeatUrl);
         
         const response = await fetch(heartbeatUrl, {
             method: 'GET',
-            cache: 'no-cache',
-            keepalive: true,
+            cache: 'no-store',
             headers: {
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
         });
+        
+        console.log('📡 Heartbeat response:', response.status, response.statusText);
         
         // Response gelirse kullanıcı online sayılır - OK dönerse online
         if (response && response.ok) {
             const data = await response.json();
+            console.log('✅ Heartbeat OK - Response:', data);
             if (data.status === 'ok') {
-                console.log('✅ Heartbeat OK - Online - IP:', data.ip, new Date(data.timestamp).toLocaleTimeString('tr-TR'));
+                console.log('✅ Kullanıcı ONLINE - IP:', data.ip, 'Tarih:', new Date(data.timestamp).toLocaleTimeString('tr-TR'));
                 return true;
             }
         }
@@ -220,19 +224,27 @@ async function sendHeartbeat() {
 // Update Online Users - Online kullanıcı sayısını güncelle
 async function updateOnlineUsers() {
     try {
-        const response = await fetch('/api/online-users', {
-            cache: 'no-cache',
+        console.log('🔄 Online kullanıcı sayısı güncelleniyor...');
+        const response = await fetch('/api/online-users?t=' + Date.now(), {
+            method: 'GET',
+            cache: 'no-store',
             headers: {
-                'Cache-Control': 'no-cache'
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache'
             }
         });
         
+        console.log('📡 Online users response:', response.status);
+        
         if (response && response.ok) {
             const data = await response.json();
+            console.log('📊 Online users data:', data);
             if (data.count !== undefined) {
                 document.getElementById('onlineUsers').textContent = data.count;
-                console.log('👥 Online kullanıcı sayısı güncellendi:', data.count);
+                console.log('✅ Online kullanıcı sayısı güncellendi:', data.count);
             }
+        } else {
+            console.warn('⚠️ Online users response başarısız:', response.status);
         }
     } catch (error) {
         console.error('❌ Çevrimiçi kullanıcı sayısı yüklenirken hata:', error);
@@ -272,15 +284,22 @@ async function loadActivities() {
     }
 }
 
-// Initialize
+// Initialize - Sayfa yüklendiğinde çalışır
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Admin panel yüklendi - Heartbeat başlatılıyor...');
+    
     loadPurchases();
     loadStats();
     loadActivities();
+    updateOnlineUsers();
     
-    // İlk heartbeat gönder (hemen)
-    sendHeartbeat().then(() => {
-        updateOnlineUsers();
+    // İlk heartbeat gönder (hemen - sayfa açılınca)
+    console.log('📤 İlk heartbeat gönderiliyor...');
+    sendHeartbeat().then((success) => {
+        if (success) {
+            console.log('✅ İlk heartbeat başarılı - Online sayısı güncelleniyor...');
+            updateOnlineUsers();
+        }
     });
     
     // Her 5 saniyede bir heartbeat gönder (sürekli online kal)
@@ -288,19 +307,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const heartbeatInterval = setInterval(async () => {
         const success = await sendHeartbeat();
         if (success) {
-            // Her 5. heartbeat'te online sayısını güncelle (25 saniyede bir)
-            const currentTime = Date.now();
-            if (!window.lastOnlineUpdate || currentTime - window.lastOnlineUpdate >= 25000) {
-                updateOnlineUsers();
-                window.lastOnlineUpdate = currentTime;
-            }
+            // Her başarılı heartbeat'te online sayısını güncelle
+            updateOnlineUsers();
         }
     }, 5000); // 5 saniye
     
-    // Her 5 saniyede bir online kullanıcı sayısını güncelle
+    console.log('⏰ Heartbeat interval başlatıldı - Her 5 saniyede bir istek gönderilecek');
+    
+    // Her 10 saniyede bir online kullanıcı sayısını güncelle (ayrı interval)
     const onlineCheckInterval = setInterval(() => {
         updateOnlineUsers();
-    }, 5000); // 5 saniye
+    }, 10000); // 10 saniye
     
     // Her 30 saniyede bir stats güncelle
     const statsInterval = setInterval(() => {
@@ -311,29 +328,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sayfa görünür olduğunda heartbeat gönder
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
+            console.log('👁️ Sayfa görünür oldu - Heartbeat gönderiliyor...');
             sendHeartbeat().then(() => {
                 updateOnlineUsers();
             });
         }
     });
     
-    // Sayfa kapatılırken son heartbeat (sendBeacon ile daha güvenilir)
-    window.addEventListener('beforeunload', () => {
-        // sendBeacon ile async gönderim
-        const data = JSON.stringify({
-            userId: getUserId(),
-            userAgent: navigator.userAgent,
-            browserInfo: {
-                language: navigator.language,
-                platform: navigator.platform
-            }
-        });
-        
-        navigator.sendBeacon('/api/online-users', new Blob([data], { type: 'application/json' }));
-    });
-    
     // Sayfa yüklendiğinde ve focus olduğunda
     window.addEventListener('focus', () => {
+        console.log('🎯 Window focus oldu - Heartbeat gönderiliyor...');
         sendHeartbeat().then(() => {
             updateOnlineUsers();
         });
@@ -341,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Network durumu değiştiğinde
     window.addEventListener('online', () => {
+        console.log('🌐 Network online oldu - Heartbeat gönderiliyor...');
         sendHeartbeat().then(() => {
             updateOnlineUsers();
         });
@@ -351,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(heartbeatInterval);
         clearInterval(onlineCheckInterval);
         clearInterval(statsInterval);
-        clearTimeout(activityTimer);
     });
 });
 

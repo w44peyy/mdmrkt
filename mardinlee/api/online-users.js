@@ -72,6 +72,8 @@ module.exports = async (req, res) => {
             // (Her 5 saniyede bir request atıldığı için 10 saniye yeterli)
             const tenSecondsAgo = new Date(now.getTime() - 10 * 1000);
             
+            console.log('👥 Online kullanıcılar kontrol ediliyor - Son 10 saniye:', tenSecondsAgo);
+            
             // Son 10 saniye içinde response alınan kullanıcıları say
             const onlineUsers = await db.collection('userSessions')
                 .countDocuments({
@@ -80,6 +82,8 @@ module.exports = async (req, res) => {
                         { lastSeen: { $gte: tenSecondsAgo } }
                     ]
                 });
+            
+            console.log('✅ Online kullanıcı sayısı:', onlineUsers);
             
             // Online kullanıcı detaylarını al (opsiyonel - debug için)
             const onlineUsersDetails = await db.collection('userSessions')
