@@ -148,24 +148,70 @@ async function loadStats() {
     }
 }
 
-// Send Heartbeat - Kullanıcının online olduğunu bildirir
+// Get Browser Fingerprint - IP ve Browser bilgisi ile unique ID oluştur
+function getBrowserFingerprint() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Browser fingerprint', 2, 2);
+    
+    const fingerprint = {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        platform: navigator.platform,
+        screenWidth: screen.width,
+        screenHeight: screen.height,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        canvasHash: canvas.toDataURL().substring(0, 100),
+        localStorage: typeof(Storage) !== "undefined",
+        sessionStorage: typeof(sessionStorage) !== "undefined"
+    };
+    
+    return btoa(JSON.stringify(fingerprint)).substring(0, 50);
+}
+
+// Get or Create User ID
+function getUserId() {
+    let userId = localStorage.getItem('userId');
+    if (!userId) {
+        userId = 'user-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('userId', userId);
+    }
+    return userId;
+}
+
+// Send Heartbeat - Kullanıcının online olduğunu bildirir (IP ve Browser ile)
 async function sendHeartbeat() {
     try {
-        const userId = localStorage.getItem('userId') || 'anonymous-' + Date.now();
-        if (!localStorage.getItem('userId')) {
-            localStorage.setItem('userId', userId);
-        }
+        const userId = getUserId();
+        const browserInfo = getBrowserFingerprint();
         
-        await fetch('/api/online-users', {
+        const response = await fetch('/api/online-users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 userId: userId,
-                userAgent: navigator.userAgent
-            })
+                userAgent: navigator.userAgent,
+                browserInfo: {
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screenWidth: screen.width,
+                    screenHeight: screen.height,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    fingerprint: browserInfo
+                }
+            }),
+            cache: 'no-cache',
+            keepalive: true
         });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Heartbeat gönderildi:', data.timestamp);
+        }
     } catch (error) {
         console.error('Heartbeat gönderilirken hata:', error);
     }
@@ -222,27 +268,26 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPurchases();
     loadStats();
     loadActivities();
+    
+    // İlk heartbeat gönder (hemen)
+    sendHeartbeat();
     updateOnlineUsers();
     
-    // İlk heartbeat gönder
-    sendHeartbeat();
-    
-    // Her 30 saniyede bir heartbeat gönder (online kal)
-    setInterval(() => {
+    // Her 10 saniyede bir heartbeat gönder (sürekli online kal)
+    const heartbeatInterval = setInterval(() => {
         sendHeartbeat();
-    }, 30000);
+    }, 10000); // 10 saniye
+    
+    // Her 15 saniyede bir online kullanıcı sayısını güncelle
+    const onlineCheckInterval = setInterval(() => {
+        updateOnlineUsers();
+    }, 15000); // 15 saniye
     
     // Her 30 saniyede bir stats güncelle
-    setInterval(() => {
+    const statsInterval = setInterval(() => {
         loadStats();
-        updateOnlineUsers();
         loadActivities();
-    }, 30000);
-    
-    // Sayfa kapatılırken son heartbeat
-    window.addEventListener('beforeunload', () => {
-        sendHeartbeat();
-    });
+    }, 30000); // 30 saniye
     
     // Sayfa görünür olduğunda heartbeat gönder
     document.addEventListener('visibilitychange', () => {
@@ -254,16 +299,62 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Mouse hareketi, klavye tuşları, scroll ile de heartbeat gönder (aktif kullanıcı)
     let activityTimer;
+    let lastActivityTime = Date.now();
+    
     const resetActivityTimer = () => {
+        lastActivityTime = Date.now();
         clearTimeout(activityTimer);
+        // 5 saniye hareketsizlikten sonra heartbeat gönder
         activityTimer = setTimeout(() => {
-            sendHeartbeat();
-        }, 10000); // 10 saniye hareketsizlikten sonra heartbeat
+            if (Date.now() - lastActivityTime >= 5000) {
+                sendHeartbeat();
+            }
+        }, 5000);
     };
     
+    // Her türlü kullanıcı aktivitesinde heartbeat gönder
     window.addEventListener('mousemove', resetActivityTimer);
+    window.addEventListener('mousedown', resetActivityTimer);
+    window.addEventListener('keydown', resetActivityTimer);
     window.addEventListener('keypress', resetActivityTimer);
     window.addEventListener('scroll', resetActivityTimer);
     window.addEventListener('click', resetActivityTimer);
+    window.addEventListener('touchstart', resetActivityTimer);
+    window.addEventListener('touchmove', resetActivityTimer);
+    
+    // Sayfa kapatılırken son heartbeat (sendBeacon ile daha güvenilir)
+    window.addEventListener('beforeunload', () => {
+        // sendBeacon ile async gönderim
+        const data = JSON.stringify({
+            userId: getUserId(),
+            userAgent: navigator.userAgent,
+            browserInfo: {
+                language: navigator.language,
+                platform: navigator.platform
+            }
+        });
+        
+        navigator.sendBeacon('/api/online-users', new Blob([data], { type: 'application/json' }));
+    });
+    
+    // Sayfa yüklendiğinde ve focus olduğunda
+    window.addEventListener('focus', () => {
+        sendHeartbeat();
+        updateOnlineUsers();
+    });
+    
+    // Network durumu değiştiğinde
+    window.addEventListener('online', () => {
+        sendHeartbeat();
+        updateOnlineUsers();
+    });
+    
+    // Cleanup (sayfa kapatılırken interval'ları temizle)
+    window.addEventListener('unload', () => {
+        clearInterval(heartbeatInterval);
+        clearInterval(onlineCheckInterval);
+        clearInterval(statsInterval);
+        clearTimeout(activityTimer);
+    });
 });
 
