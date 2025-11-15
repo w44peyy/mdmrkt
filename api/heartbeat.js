@@ -44,15 +44,16 @@ module.exports = async (req, res) => {
             const dbResult = await connectToDatabase();
             db = dbResult.db;
             
-            // Kullanıcı aktivitesini kaydet/güncelle (IP ile)
+            // Kullanıcı aktivitesini kaydet/güncelle - IP bazında unique (1 IP = 1 kullanıcı)
+            // IP adresi unique identifier olarak kullanılıyor, user agent fark etmiyor
             const result = await db.collection('userSessions').updateOne(
-                { userFingerprint: userFingerprint },
+                { ip: ip }, // IP adresi unique identifier
                 {
                     $set: {
-                        userId: userFingerprint,
-                        userFingerprint: userFingerprint,
+                        userId: ip, // IP adresi userId olarak
+                        userFingerprint: userFingerprint, // Metadata olarak saklanıyor
                         lastSeen: now,
-                        userAgent: userAgent,
+                        userAgent: userAgent, // En son user agent saklanıyor
                         ip: ip,
                         isOnline: true,
                         lastResponseAt: now
@@ -85,14 +86,19 @@ module.exports = async (req, res) => {
                     });
                 }
                 
-                // Aktif kullanıcıları say - Daha basit query
+                // Aktif kullanıcıları say - IP bazında unique (1 IP = 1 kullanıcı)
                 // Son 15 saniye içinde lastResponseAt veya lastSeen güncellenen kullanıcılar
-                const activeUsers = await db.collection('userSessions').countDocuments({
+                // Distinct IP adresi sayısını alıyoruz
+                const activeUsersQuery = await db.collection('userSessions').find({
                     $or: [
                         { lastResponseAt: { $gte: fifteenSecondsAgo } },
                         { lastSeen: { $gte: fifteenSecondsAgo } }
                     ]
-                });
+                }).toArray();
+                
+                // Unique IP adreslerini say
+                const uniqueIPs = new Set(activeUsersQuery.map(u => u.ip));
+                const activeUsers = uniqueIPs.size;
                 
                 console.log('✅ Aktif kullanıcı sayısı (15 saniye içinde):', activeUsers);
 

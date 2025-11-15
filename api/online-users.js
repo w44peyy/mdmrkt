@@ -80,10 +80,9 @@ module.exports = async (req, res) => {
             
             console.log('👥 Online kullanıcılar kontrol ediliyor - Son 15 saniye:', fifteenSecondsAgo);
             
-            // Son 15 saniye içinde response alınan kullanıcıları say
-            // Önce lastResponseAt'e bak, yoksa lastSeen'e bak
-            const onlineUsers = await db.collection('userSessions')
-                .countDocuments({
+            // Son 15 saniye içinde response alınan kullanıcıları say - IP bazında unique (1 IP = 1 kullanıcı)
+            const onlineUsersQuery = await db.collection('userSessions')
+                .find({
                     $or: [
                         { lastResponseAt: { $gte: fifteenSecondsAgo } },
                         { 
@@ -93,7 +92,12 @@ module.exports = async (req, res) => {
                             ]
                         }
                     ]
-                });
+                })
+                .toArray();
+            
+            // Unique IP adreslerini say
+            const uniqueIPs = new Set(onlineUsersQuery.map(u => u.ip));
+            const onlineUsers = uniqueIPs.size;
             
             console.log('✅ Online kullanıcı sayısı:', onlineUsers);
             

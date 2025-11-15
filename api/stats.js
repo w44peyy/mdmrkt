@@ -21,9 +21,9 @@ module.exports = async (req, res) => {
         // Toplam sepet sayısı
         const totalCarts = await db.collection('carts').countDocuments();
         
-        // Aktif kullanıcı sayısı - Son 15 saniye içinde heartbeat gönderenler
+        // Aktif kullanıcı sayısı - Son 15 saniye içinde heartbeat gönderenler - IP bazında unique (1 IP = 1 kullanıcı)
         const fifteenSecondsAgo = new Date(now.getTime() - 15 * 1000);
-        const onlineUsers = await db.collection('userSessions').countDocuments({
+        const onlineUsersQuery = await db.collection('userSessions').find({
             $or: [
                 { lastResponseAt: { $gte: fifteenSecondsAgo } },
                 { 
@@ -33,7 +33,11 @@ module.exports = async (req, res) => {
                     ]
                 }
             ]
-        });
+        }).toArray();
+        
+        // Unique IP adreslerini say
+        const uniqueIPs = new Set(onlineUsersQuery.map(u => u.ip));
+        const onlineUsers = uniqueIPs.size;
 
         // Stats collection'ını güncelle
         try {
