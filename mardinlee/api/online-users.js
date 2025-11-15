@@ -68,18 +68,24 @@ module.exports = async (req, res) => {
             const { db } = await connectToDatabase();
             
             const now = new Date();
-            // Son 10 saniye içinde heartbeat response'u alınan kullanıcıları online say
-            // (Her 5 saniyede bir request atıldığı için 10 saniye yeterli)
-            const tenSecondsAgo = new Date(now.getTime() - 10 * 1000);
+            // Son 15 saniye içinde heartbeat response'u alınan kullanıcıları online say
+            // (Her 5 saniyede bir request atıldığı için 15 saniye yeterli - buffer ekliyoruz)
+            const fifteenSecondsAgo = new Date(now.getTime() - 15 * 1000);
             
-            console.log('👥 Online kullanıcılar kontrol ediliyor - Son 10 saniye:', tenSecondsAgo);
+            console.log('👥 Online kullanıcılar kontrol ediliyor - Son 15 saniye:', fifteenSecondsAgo);
             
-            // Son 10 saniye içinde response alınan kullanıcıları say
+            // Son 15 saniye içinde response alınan kullanıcıları say
+            // Önce lastResponseAt'e bak, yoksa lastSeen'e bak
             const onlineUsers = await db.collection('userSessions')
                 .countDocuments({
                     $or: [
-                        { lastResponseAt: { $gte: tenSecondsAgo } },
-                        { lastSeen: { $gte: tenSecondsAgo } }
+                        { lastResponseAt: { $gte: fifteenSecondsAgo } },
+                        { 
+                            $and: [
+                                { lastResponseAt: { $exists: false } },
+                                { lastSeen: { $gte: fifteenSecondsAgo } }
+                            ]
+                        }
                     ]
                 });
             
@@ -89,20 +95,31 @@ module.exports = async (req, res) => {
             const onlineUsersDetails = await db.collection('userSessions')
                 .find({
                     $or: [
-                        { lastResponseAt: { $gte: tenSecondsAgo } },
-                        { lastSeen: { $gte: tenSecondsAgo } }
+                        { lastResponseAt: { $gte: fifteenSecondsAgo } },
+                        { 
+                            $and: [
+                                { lastResponseAt: { $exists: false } },
+                                { lastSeen: { $gte: fifteenSecondsAgo } }
+                            ]
+                        }
                     ]
                 })
-                .sort({ lastSeen: -1 })
+                .sort({ lastResponseAt: -1, lastSeen: -1 })
                 .limit(100)
                 .toArray();
             
-            // Eski kayıtları temizle (30 saniyeden eski)
-            const thirtySecondsAgo = new Date(now.getTime() - 30 * 1000);
-            await db.collection('userSessions').deleteMany({
-                lastSeen: { $lt: thirtySecondsAgo },
-                lastResponseAt: { $lt: thirtySecondsAgo }
+            // Eski kayıtları temizle (20 saniyeden eski - daha agresif temizlik)
+            const twentySecondsAgo = new Date(now.getTime() - 20 * 1000);
+            const deleteResult = await db.collection('userSessions').deleteMany({
+                $and: [
+                    { lastSeen: { $lt: twentySecondsAgo } },
+                    { lastResponseAt: { $lt: twentySecondsAgo } }
+                ]
             });
+            
+            if (deleteResult.deletedCount > 0) {
+                console.log('🗑️ Eski kullanıcı kayıtları temizlendi:', deleteResult.deletedCount);
+            }
             
             return res.status(200).json({ 
                 count: onlineUsers,

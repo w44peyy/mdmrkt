@@ -1,24 +1,4 @@
-// Socket.io connection
-// Not: Vercel'de socket.io için ayrı bir server gerekebilir
-// Şimdilik polling ile çalışacak şekilde ayarlandı
-let socket = null;
-
-try {
-    // Socket.io server URL'i - Vercel'de ayrı bir server gerekebilir
-    // Şimdilik mevcut origin'i kullan, veya SOCKET_URL environment variable'ı set edilebilir
-    const socketUrl = window.SOCKET_URL || window.location.origin;
-    socket = io(socketUrl, {
-        transports: ['polling', 'websocket'],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionAttempts: 5
-    });
-} catch (error) {
-    console.warn('Socket.io bağlantısı kurulamadı:', error);
-    // Socket.io olmadan da çalışabilir (polling ile)
-}
-
-// Navigation
+// Navigation - Heartbeat sistemi ile çalışıyor (Socket.io kaldırıldı)
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
         e.preventDefault();
@@ -33,33 +13,6 @@ document.querySelectorAll('.nav-item').forEach(item => {
         document.getElementById(section).classList.add('active');
     });
 });
-
-// Socket.io Events
-if (socket) {
-    socket.on('connect', () => {
-        console.log('Socket.io bağlandı');
-        updateOnlineUsers();
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Socket.io bağlantısı kesildi');
-    });
-
-    socket.on('userActivity', (data) => {
-        addActivityLog(data);
-    });
-
-    socket.on('onlineUsersUpdate', (count) => {
-        document.getElementById('onlineUsers').textContent = count;
-    });
-
-    socket.on('cartUpdate', (count) => {
-        document.getElementById('totalCarts').textContent = count;
-    });
-} else {
-    // Socket.io yoksa polling ile güncelleme yap
-    console.log('Socket.io kullanılamıyor, polling modunda çalışılıyor');
-}
 
 // Activity Log Functions
 function addActivityLog(data) {
