@@ -58,8 +58,7 @@ module.exports = async (req, res) => {
                         lastResponseAt: now
                     },
                     $setOnInsert: {
-                        createdAt: now,
-                        requestCount: 0
+                        createdAt: now
                     },
                     $inc: { requestCount: 1 }
                 },
