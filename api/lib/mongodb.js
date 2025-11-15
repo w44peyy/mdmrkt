@@ -29,3 +29,4 @@ async function connectToDatabase() {
 
 module.exports = { connectToDatabase };
 
+export default connectToDatabase;
