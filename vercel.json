@@ -26,10 +26,14 @@
       "source": "/api/activity",
       "destination": "/mardinlee/api/activity.js"
     },
-    {
-      "source": "/api/heartbeat",
-      "destination": "/mardinlee/api/heartbeat.js"
-    }
+        {
+          "source": "/api/heartbeat",
+          "destination": "/mardinlee/api/heartbeat.js"
+        },
+        {
+          "source": "/api/init",
+          "destination": "/api/init.js"
+        }
   ],
   "headers": [
     {

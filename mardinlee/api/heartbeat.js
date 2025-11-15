@@ -68,6 +68,41 @@ module.exports = async (req, res) => {
             
             console.log('✅ Heartbeat kaydedildi - MongoDB:', result.modifiedCount > 0 ? 'güncellendi' : 'yeni kayıt');
             
+            // Aktif kullanıcı sayısını stats collection'ına kaydet
+            try {
+                const fifteenSecondsAgo = new Date(now.getTime() - 15 * 1000);
+                const activeUsers = await db.collection('userSessions').countDocuments({
+                    $or: [
+                        { lastResponseAt: { $gte: fifteenSecondsAgo } },
+                        { 
+                            $and: [
+                                { lastResponseAt: { $exists: false } },
+                                { lastSeen: { $gte: fifteenSecondsAgo } }
+                            ]
+                        }
+                    ]
+                });
+
+                await db.collection('stats').updateOne(
+                    { _id: 'current' },
+                    {
+                        $set: {
+                            activeUsers: activeUsers,
+                            lastUpdated: now
+                        },
+                        $setOnInsert: {
+                            totalCarts: 0,
+                            totalPurchases: 0,
+                            createdAt: now
+                        }
+                    },
+                    { upsert: true }
+                );
+            } catch (statsError) {
+                // Stats hatası önemli değil, sadece log
+                console.warn('Stats güncellenemedi:', statsError);
+            }
+            
         } catch (dbError) {
             console.error('❌ MongoDB hatası:', dbError);
             // MongoDB hatası olsa bile response döndür - kullanıcı online sayılır

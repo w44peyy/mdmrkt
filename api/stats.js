@@ -1,26 +1,73 @@
 const { connectToDatabase } = require('./lib/mongodb');
 
 module.exports = async (req, res) => {
+    // CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Content-Type', 'application/json');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
         const { db } = await connectToDatabase();
+        const now = new Date();
         
         // Toplam sepet sayısı
         const totalCarts = await db.collection('carts').countDocuments();
         
-        // Online kullanıcı sayısı (socket.io'dan alınacak, şimdilik 0)
-        const onlineUsers = 0;
+        // Aktif kullanıcı sayısı - Son 15 saniye içinde heartbeat gönderenler
+        const fifteenSecondsAgo = new Date(now.getTime() - 15 * 1000);
+        const onlineUsers = await db.collection('userSessions').countDocuments({
+            $or: [
+                { lastResponseAt: { $gte: fifteenSecondsAgo } },
+                { 
+                    $and: [
+                        { lastResponseAt: { $exists: false } },
+                        { lastSeen: { $gte: fifteenSecondsAgo } }
+                    ]
+                }
+            ]
+        });
+
+        // Stats collection'ını güncelle
+        try {
+            await db.collection('stats').updateOne(
+                { _id: 'current' },
+                {
+                    $set: {
+                        activeUsers: onlineUsers,
+                        totalCarts: totalCarts,
+                        lastUpdated: now
+                    },
+                    $setOnInsert: {
+                        totalPurchases: 0,
+                        createdAt: now
+                    }
+                },
+                { upsert: true }
+            );
+        } catch (statsError) {
+            console.warn('Stats güncellenemedi:', statsError);
+        }
 
         return res.status(200).json({
             totalCarts,
-            onlineUsers
+            onlineUsers,
+            activeUsers: onlineUsers, // Aynı değer, farklı isimle de döndür
+            timestamp: now.toISOString()
         });
     } catch (error) {
-        console.error('MongoDB error:', error);
-        return res.status(500).json({ error: 'Veritabanı hatası' });
+        console.error('❌ Stats error:', error);
+        return res.status(500).json({ 
+            error: 'Veritabanı hatası',
+            message: error.message 
+        });
     }
 };
 
