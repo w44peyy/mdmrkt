@@ -27,7 +27,8 @@ module.exports = async (req, res) => {
             const now = new Date();
             
             // Kullanıcı aktivitesini kaydet/güncelle
-            await db.collection('userSessions').updateOne(
+            // Response gönderildiğinde kullanıcı online sayılır
+            const result = await db.collection('userSessions').updateOne(
                 { userFingerprint: userFingerprint },
                 {
                     $set: {
@@ -37,7 +38,8 @@ module.exports = async (req, res) => {
                         userAgent: browserAgent,
                         browserInfo: browserInfo || {},
                         ip: ip,
-                        isOnline: true
+                        isOnline: true,
+                        lastResponseAt: now
                     },
                     $setOnInsert: {
                         createdAt: now,
@@ -48,7 +50,13 @@ module.exports = async (req, res) => {
                 { upsert: true }
             );
             
-            return res.status(200).json({ success: true, timestamp: now });
+            // Response gönder - response gelirse kullanıcı online
+            return res.status(200).json({ 
+                success: true, 
+                timestamp: now,
+                userFingerprint: userFingerprint,
+                message: 'Heartbeat alındı, kullanıcı online'
+            });
         } catch (error) {
             console.error('Heartbeat error:', error);
             return res.status(500).json({ error: 'Sunucu hatası' });
@@ -60,28 +68,36 @@ module.exports = async (req, res) => {
             const { db } = await connectToDatabase();
             
             const now = new Date();
-            // Son 2 dakika içinde aktivitesi olan kullanıcıları online say
-            const twoMinutesAgo = new Date(now.getTime() - 2 * 60 * 1000);
+            // Son 10 saniye içinde heartbeat response'u alınan kullanıcıları online say
+            // (Her 5 saniyede bir request atıldığı için 10 saniye yeterli)
+            const tenSecondsAgo = new Date(now.getTime() - 10 * 1000);
             
-            // Son 2 dakika içinde aktivitesi olan kullanıcıları say
+            // Son 10 saniye içinde response alınan kullanıcıları say
             const onlineUsers = await db.collection('userSessions')
                 .countDocuments({
-                    lastSeen: { $gte: twoMinutesAgo }
+                    $or: [
+                        { lastResponseAt: { $gte: tenSecondsAgo } },
+                        { lastSeen: { $gte: tenSecondsAgo } }
+                    ]
                 });
             
             // Online kullanıcı detaylarını al (opsiyonel - debug için)
             const onlineUsersDetails = await db.collection('userSessions')
                 .find({
-                    lastSeen: { $gte: twoMinutesAgo }
+                    $or: [
+                        { lastResponseAt: { $gte: tenSecondsAgo } },
+                        { lastSeen: { $gte: tenSecondsAgo } }
+                    ]
                 })
                 .sort({ lastSeen: -1 })
                 .limit(100)
                 .toArray();
             
-            // Eski kayıtları temizle (10 dakikadan eski)
-            const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+            // Eski kayıtları temizle (30 saniyeden eski)
+            const thirtySecondsAgo = new Date(now.getTime() - 30 * 1000);
             await db.collection('userSessions').deleteMany({
-                lastSeen: { $lt: tenMinutesAgo }
+                lastSeen: { $lt: thirtySecondsAgo },
+                lastResponseAt: { $lt: thirtySecondsAgo }
             });
             
             return res.status(200).json({ 

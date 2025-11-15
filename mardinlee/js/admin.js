@@ -182,6 +182,7 @@ function getUserId() {
 }
 
 // Send Heartbeat - Kullanıcının online olduğunu bildirir (IP ve Browser ile)
+// Response gelirse kullanıcı online sayılır
 async function sendHeartbeat() {
     try {
         const userId = getUserId();
@@ -208,25 +209,40 @@ async function sendHeartbeat() {
             keepalive: true
         });
         
-        if (response.ok) {
+        // Response gelirse kullanıcı online sayılır
+        if (response && response.ok) {
             const data = await response.json();
-            console.log('Heartbeat gönderildi:', data.timestamp);
+            console.log('✅ Heartbeat başarılı - Online:', new Date(data.timestamp).toLocaleTimeString('tr-TR'));
+            return true;
+        } else {
+            console.warn('⚠️ Heartbeat başarısız - Response:', response?.status);
+            return false;
         }
     } catch (error) {
-        console.error('Heartbeat gönderilirken hata:', error);
+        console.error('❌ Heartbeat hatası:', error);
+        return false;
     }
 }
 
-// Update Online Users
+// Update Online Users - Online kullanıcı sayısını güncelle
 async function updateOnlineUsers() {
     try {
-        const response = await fetch('/api/online-users');
-        const data = await response.json();
-        if (data.count !== undefined) {
-            document.getElementById('onlineUsers').textContent = data.count;
+        const response = await fetch('/api/online-users', {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+        
+        if (response && response.ok) {
+            const data = await response.json();
+            if (data.count !== undefined) {
+                document.getElementById('onlineUsers').textContent = data.count;
+                console.log('👥 Online kullanıcı sayısı güncellendi:', data.count);
+            }
         }
     } catch (error) {
-        console.error('Çevrimiçi kullanıcı sayısı yüklenirken hata:', error);
+        console.error('❌ Çevrimiçi kullanıcı sayısı yüklenirken hata:', error);
     }
 }
 
@@ -270,18 +286,28 @@ document.addEventListener('DOMContentLoaded', () => {
     loadActivities();
     
     // İlk heartbeat gönder (hemen)
-    sendHeartbeat();
-    updateOnlineUsers();
+    sendHeartbeat().then(() => {
+        updateOnlineUsers();
+    });
     
-    // Her 10 saniyede bir heartbeat gönder (sürekli online kal)
-    const heartbeatInterval = setInterval(() => {
-        sendHeartbeat();
-    }, 10000); // 10 saniye
+    // Her 5 saniyede bir heartbeat gönder (sürekli online kal)
+    // Response gelirse kullanıcı online sayılır
+    const heartbeatInterval = setInterval(async () => {
+        const success = await sendHeartbeat();
+        if (success) {
+            // Her 5. heartbeat'te online sayısını güncelle (25 saniyede bir)
+            const currentTime = Date.now();
+            if (!window.lastOnlineUpdate || currentTime - window.lastOnlineUpdate >= 25000) {
+                updateOnlineUsers();
+                window.lastOnlineUpdate = currentTime;
+            }
+        }
+    }, 5000); // 5 saniye
     
-    // Her 15 saniyede bir online kullanıcı sayısını güncelle
+    // Her 5 saniyede bir online kullanıcı sayısını güncelle
     const onlineCheckInterval = setInterval(() => {
         updateOnlineUsers();
-    }, 15000); // 15 saniye
+    }, 5000); // 5 saniye
     
     // Her 30 saniyede bir stats güncelle
     const statsInterval = setInterval(() => {
@@ -292,35 +318,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sayfa görünür olduğunda heartbeat gönder
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
-            sendHeartbeat();
-            updateOnlineUsers();
+            sendHeartbeat().then(() => {
+                updateOnlineUsers();
+            });
         }
     });
-    
-    // Mouse hareketi, klavye tuşları, scroll ile de heartbeat gönder (aktif kullanıcı)
-    let activityTimer;
-    let lastActivityTime = Date.now();
-    
-    const resetActivityTimer = () => {
-        lastActivityTime = Date.now();
-        clearTimeout(activityTimer);
-        // 5 saniye hareketsizlikten sonra heartbeat gönder
-        activityTimer = setTimeout(() => {
-            if (Date.now() - lastActivityTime >= 5000) {
-                sendHeartbeat();
-            }
-        }, 5000);
-    };
-    
-    // Her türlü kullanıcı aktivitesinde heartbeat gönder
-    window.addEventListener('mousemove', resetActivityTimer);
-    window.addEventListener('mousedown', resetActivityTimer);
-    window.addEventListener('keydown', resetActivityTimer);
-    window.addEventListener('keypress', resetActivityTimer);
-    window.addEventListener('scroll', resetActivityTimer);
-    window.addEventListener('click', resetActivityTimer);
-    window.addEventListener('touchstart', resetActivityTimer);
-    window.addEventListener('touchmove', resetActivityTimer);
     
     // Sayfa kapatılırken son heartbeat (sendBeacon ile daha güvenilir)
     window.addEventListener('beforeunload', () => {
@@ -339,14 +341,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Sayfa yüklendiğinde ve focus olduğunda
     window.addEventListener('focus', () => {
-        sendHeartbeat();
-        updateOnlineUsers();
+        sendHeartbeat().then(() => {
+            updateOnlineUsers();
+        });
     });
     
     // Network durumu değiştiğinde
     window.addEventListener('online', () => {
-        sendHeartbeat();
-        updateOnlineUsers();
+        sendHeartbeat().then(() => {
+            updateOnlineUsers();
+        });
     });
     
     // Cleanup (sayfa kapatılırken interval'ları temizle)
