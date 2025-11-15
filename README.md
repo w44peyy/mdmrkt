@@ -20,7 +20,9 @@ npm install
 
 2. Environment değişkenlerini ayarlayın (Vercel'de):
 - `MONGODB_URI`: MongoDB bağlantı string'i
-- `MONGODB_DB`: Veritabanı adı (opsiyonel, varsayılan: mediamarkt)
+- `MONGODB_DB`: Veritabanı adı (varsayılan: toki)
+
+Detaylı kurulum için `MONGODB_SETUP.md` dosyasına bakın.
 
 3. Vercel'e deploy edin:
 ```bash
@@ -37,18 +39,33 @@ node server.js
 
 Veya ayrı bir Vercel deployment olarak deploy edebilirsiniz.
 
-## MongoDB Collections
+## MongoDB Collections (Veritabanı: "toki")
 
 Admin paneli şu collection'ları kullanır:
 
-- `purchases`: Satın alma kayıtları
-  - `firstName`: Ad
-  - `lastName`: Soyad
-  - `iban`: IBAN
-  - `createdAt`: Oluşturulma tarihi
+### 1. `purchases` - Satın Alanlar
+- `firstName`: Ad
+- `lastName`: Soyad
+- `iban`: IBAN
+- `address`: Adres (opsiyonel - sonra eklenecek)
+- `phone`: Telefon numarası (opsiyonel - sonra eklenecek)
+- `createdAt`: Oluşturulma tarihi
+- `updatedAt`: Güncellenme tarihi
 
-- `carts`: Sepet kayıtları
-  - Toplam sepet sayısını hesaplamak için kullanılır
+### 2. `carts` - Sepetler
+- Toplam sepet sayısını hesaplamak için kullanılır
+- `userId`: Kullanıcı ID (opsiyonel)
+- `items`: Sepet ürünleri
+- `total`: Toplam tutar
+- `createdAt`: Oluşturulma tarihi
+
+### 3. `activities` - Kullanıcı Aktiviteleri
+- `userId`: Kullanıcı ID
+- `message`: Aktivite mesajı
+- `type`: Aktivite tipi (örn: "login", "purchase", "cart_add")
+- `createdAt`: Oluşturulma tarihi
+
+Detaylı kurulum ve collection yapısı için `MONGODB_SETUP.md` dosyasına bakın.
 
 ## API Endpoints
 
