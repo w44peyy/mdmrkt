@@ -27,6 +27,10 @@
       "destination": "/mardinlee/api/activity.js"
     },
     {
+      "source": "/api/products",
+      "destination": "/mardinlee/api/products.js"
+    },
+    {
       "source": "/api/visitors",
       "destination": "/mardinlee/api/visitors.js"
     },

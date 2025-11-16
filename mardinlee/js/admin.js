@@ -221,7 +221,7 @@ async function loadActivities() {
     }
 }
 
-// Basit ürün listesi (şimdilik sadece frontend'de tutuluyor)
+// Ürün listesi
 let products = [];
 
 function renderProductsTable() {
@@ -245,8 +245,37 @@ function renderProductsTable() {
 }
 
 async function loadProducts() {
-    console.log('🔄 Ürünler yükleniyor (lokal liste)...');
-    renderProductsTable();
+    console.log('🔄 Ürünler yükleniyor (API)...');
+    const tbody = document.getElementById('productsTableBody');
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="5" class="loading">Yükleniyor...</td></tr>';
+    }
+
+    try {
+        const response = await fetch('/api/products');
+        console.log('📡 /api/products response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('📊 /api/products data:', data);
+
+        if (Array.isArray(data)) {
+            products = data;
+        } else {
+            console.warn('⚠️ /api/products response array değil:', data);
+            products = [];
+        }
+
+        renderProductsTable();
+    } catch (error) {
+        console.error('❌ Ürünler yüklenirken hata:', error);
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Ürünler yüklenirken bir hata oluştu</td></tr>';
+        }
+    }
 }
 
 function addProductFromForm() {
@@ -290,17 +319,39 @@ function addProductFromForm() {
         category: '-' // Şimdilik sabit, sonra kategori alanı eklenebilir
     };
 
-    products.push(product);
-    console.log('✅ Ürün eklendi:', product);
+    // API'ye kaydet
+    fetch('/api/products', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(product)
+    })
+    .then(async (res) => {
+        console.log('📡 /api/products POST status:', res.status);
+        const data = await res.json().catch(() => ({}));
+        console.log('📡 /api/products POST response:', data);
 
-    renderProductsTable();
+        if (!res.ok || !data.success) {
+            throw new Error(data.message || 'Ürün kaydedilirken bir hata oluştu');
+        }
 
-    // Formu temizle
-    nameEl.value = '';
-    realPriceEl.value = '';
-    discountedPriceEl.value = '';
-    discountPercentEl.value = '';
-    imageEl.value = '';
+        console.log('✅ Ürün başarıyla kaydedildi:', data.product);
+
+        // Formu temizle
+        nameEl.value = '';
+        realPriceEl.value = '';
+        discountedPriceEl.value = '';
+        discountPercentEl.value = '';
+        imageEl.value = '';
+
+        // Listeleri tekrar yükle
+        loadProducts();
+    })
+    .catch((error) => {
+        console.error('❌ Ürün kaydedilirken hata:', error);
+        alert('❌ Ürün kaydedilirken bir hata oluştu: ' + error.message);
+    });
 }
 
 // Load Visitors
