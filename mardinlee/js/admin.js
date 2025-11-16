@@ -11,6 +11,17 @@ document.querySelectorAll('.nav-item').forEach(item => {
         // Update active section
         document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
         document.getElementById(section).classList.add('active');
+        
+        // Section'a göre veri yükle
+        if (section === 'visitors') {
+            loadVisitors();
+        } else if (section === 'purchases') {
+            loadPurchases();
+        } else if (section === 'logs') {
+            loadStats();
+            loadActivities();
+            updateOnlineUsers();
+        }
     });
 });
 
@@ -240,21 +251,46 @@ async function loadActivities() {
 // Load Visitors
 async function loadVisitors() {
     const tbody = document.getElementById('visitorsTableBody');
+    if (!tbody) {
+        console.error('❌ visitorsTableBody elementi bulunamadı');
+        return;
+    }
+    
     tbody.innerHTML = '<tr><td colspan="5" class="loading">Yükleniyor...</td></tr>';
     
     try {
+        console.log('🔄 Ziyaretçiler yükleniyor...');
         const response = await fetch('/api/visitors');
+        console.log('📡 Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('📊 Ziyaretçiler data:', data);
+        console.log('📊 Data type:', typeof data, 'Is array:', Array.isArray(data));
+        console.log('📊 Data length:', data.length);
         
         if (data.error) {
+            console.error('❌ API error:', data.error);
             tbody.innerHTML = `<tr><td colspan="5" class="empty-state">${data.error}</td></tr>`;
             return;
         }
         
+        if (!Array.isArray(data)) {
+            console.error('❌ Data bir array değil:', data);
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Veri formatı hatalı</td></tr>';
+            return;
+        }
+        
         if (data.length === 0) {
+            console.log('⚠️ Ziyaretçi kaydı yok');
             tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Henüz ziyaretçi kaydı yok</td></tr>';
             return;
         }
+        
+        console.log('✅ Ziyaretçiler tabloya yazılıyor:', data.length, 'kayıt');
         
         tbody.innerHTML = data.map(visitor => {
             const deviceType = visitor.deviceType || 'Unknown';
@@ -274,9 +310,13 @@ async function loadVisitors() {
                 </tr>
             `;
         }).join('');
+        
+        console.log('✅ Ziyaretçiler başarıyla yüklendi');
     } catch (error) {
-        console.error('Ziyaretçiler yüklenirken hata:', error);
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Veriler yüklenirken bir hata oluştu</td></tr>';
+        console.error('❌ Ziyaretçiler yüklenirken hata:', error);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Stack trace:', error.stack);
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Veriler yüklenirken bir hata oluştu: ' + error.message + '</td></tr>';
     }
 }
 

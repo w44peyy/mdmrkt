@@ -37,12 +37,20 @@ module.exports = async (req, res) => {
         try {
             const { db } = await connectToDatabase();
             
-            // Tüm ziyaretçileri getir (en yeni önce)
+            console.log('📥 Visitors GET isteği alındı');
+            
+            // Collection'da kaç kayıt var kontrol et
+            const totalCount = await db.collection('visitors').countDocuments();
+            console.log('📊 Toplam ziyaretçi sayısı:', totalCount);
+            
+            // Tüm ziyaretçileri getir (en yeni önce) - lastVisit veya firstVisit'e göre sırala
             const visitors = await db.collection('visitors')
                 .find({})
-                .sort({ firstVisit: -1 })
+                .sort({ lastVisit: -1, firstVisit: -1 })
                 .limit(1000)
                 .toArray();
+            
+            console.log('✅ Ziyaretçiler getirildi:', visitors.length, 'kayıt');
             
             // Device type'ı ekle (eğer yoksa)
             const visitorsWithDevice = visitors.map(visitor => ({
@@ -50,9 +58,22 @@ module.exports = async (req, res) => {
                 deviceType: visitor.deviceType || getDeviceType(visitor.userAgent)
             }));
             
+            console.log('📤 Ziyaretçiler response gönderiliyor:', visitorsWithDevice.length, 'kayıt');
+            if (visitorsWithDevice.length > 0) {
+                console.log('📝 İlk ziyaretçi örneği:', {
+                    ip: visitorsWithDevice[0].ip,
+                    deviceType: visitorsWithDevice[0].deviceType,
+                    visitCount: visitorsWithDevice[0].visitCount,
+                    firstVisit: visitorsWithDevice[0].firstVisit,
+                    lastVisit: visitorsWithDevice[0].lastVisit
+                });
+            }
+            
             return res.status(200).json(visitorsWithDevice);
         } catch (error) {
             console.error('❌ Visitors GET error:', error);
+            console.error('❌ Error message:', error.message);
+            console.error('❌ Stack trace:', error.stack);
             return res.status(500).json({ 
                 error: 'Veritabanı hatası',
                 message: error.message 
