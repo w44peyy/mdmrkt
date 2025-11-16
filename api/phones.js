@@ -7,7 +7,7 @@ const DEFAULT_PHONE_MODELS = [
   {
     family: 'iPhone 17 Pro Max',
     baseName: 'APPLE iPhone 17 Pro Max 5G',
-    imageUrl: 'https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_161554000/fee_786_587_png', // Her telefona özel resim linki
+    imageUrl: './images/orange-iphone17promax-removebg-preview.png',
     storageOptions: [
       { storage: '256 GB', realPrice: 1599, discountedPrice: 1499 },
       { storage: '512 GB', realPrice: 1799, discountedPrice: 1699 },
@@ -21,7 +21,7 @@ const DEFAULT_PHONE_MODELS = [
   {
     family: 'iPhone 17 Pro',
     baseName: 'APPLE iPhone 17 Pro 5G',
-    imageUrl: 'https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_161554000/fee_786_587_png',
+    imageUrl: 'https://cdn0.it4profit.com/s3size/el:t/rt:fill/plain/s3://cms/product/2d/22/2d22e5e521d6491cf0dd8c0c8a47f2eb/250915140013863146.webp',
     storageOptions: [
       { storage: '256 GB', realPrice: 1499, discountedPrice: 1399 },
       { storage: '512 GB', realPrice: 1699, discountedPrice: 1599 },

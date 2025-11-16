@@ -7,7 +7,7 @@ const DEFAULT_PHONE_MODELS = [
   {
     family: 'iPhone 17 Pro Max',
     baseName: 'APPLE iPhone 17 Pro Max 5G',
-    imageUrl: 'https://www.actimag.biz/6521-large_default/iphone-17-pro.jpg',
+    imageUrl: './images/orange-iphone17promax-removebg-preview.png',
     storageOptions: [
       { storage: '256 GB', realPrice: 1599, discountedPrice: 1499 },
       { storage: '512 GB', realPrice: 1799, discountedPrice: 1699 },
