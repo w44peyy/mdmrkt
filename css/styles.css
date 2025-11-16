@@ -307,67 +307,55 @@ body {
   margin: 0;
 }
 
-/* Grid - Mobilde 2 sütun */
+/* Grid - Mobilde 2 sütun, her satırda aynı sayıda ürün */
 .black-week-products-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  width: 100%;
   box-sizing: border-box;
-  padding: 0;
+  padding: 0 8px 0 0;
   margin: 0;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
 }
 
-/* Mobilde grid padding */
-@media (max-width: 767px) {
-  .black-week-products-grid {
-    margin-left: -8px;
-    margin-right: -8px;
-    width: calc(100% + 16px);
-  }
-}
-
-/* Tablet - 4 sütun, ilk ürün en sola yapışık */
+/* Tablet - 4 sütun, her satırda aynı sayıda ürün */
 @media (min-width: 768px) and (max-width: 1023px) {
   .black-week-products-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    margin-left: -16px;
-    margin-right: -16px;
-    width: calc(100% + 32px);
+    padding: 0 16px 0 0;
   }
 }
 
-/* Desktop - 5 sütun, ilk ürün en sola yapışık */
+/* Desktop - 5 sütun, her satırda aynı sayıda ürün */
 @media (min-width: 1024px) and (max-width: 1279px) {
   .black-week-products-grid {
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
-    margin-left: -16px;
-    margin-right: -16px;
-    width: calc(100% + 32px);
+    padding: 0 16px 0 0;
   }
 }
 
-/* Büyük Desktop - 6 sütun, ilk ürün en sola yapışık */
+/* Büyük Desktop - 6 sütun, her satırda aynı sayıda ürün */
 @media (min-width: 1280px) and (max-width: 1599px) {
   .black-week-products-grid {
     grid-template-columns: repeat(6, 1fr);
     gap: 8px;
-    margin-left: -16px;
-    margin-right: -16px;
-    width: calc(100% + 32px);
+    padding: 0 16px 0 0;
   }
 }
 
-/* Çok Büyük Desktop - 7 sütun, ilk ürün en sola yapışık */
+/* Çok Büyük Desktop - 7 sütun, her satırda aynı sayıda ürün */
 @media (min-width: 1600px) {
   .black-week-products-grid {
     grid-template-columns: repeat(7, 1fr);
     gap: 8px;
-    margin-left: -16px;
-    margin-right: -16px;
-    width: calc(100% + 32px);
+    padding: 0 16px 0 0;
   }
 }
 
