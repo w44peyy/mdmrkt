@@ -216,30 +216,12 @@ module.exports = async (req, res) => {
       return res.status(200).json(phone);
     }
 
-    // Eğer boşsa varsayılanları seed et
+    // Eğer boşsa varsayılanları seed et (sadece bir kez)
     const count = await phonesCol.countDocuments();
     if (count === 0) {
       const docs = DEFAULT_PHONE_MODELS.map(toDoc);
       await phonesCol.insertMany(docs);
       console.log('📱 Default iPhone modelleri phones koleksiyonuna eklendi:', docs.length);
-    } else {
-      // Mevcut kayıtları phones.js'deki imageUrl'lerle güncelle
-      for (const model of DEFAULT_PHONE_MODELS) {
-        if (model.imageUrl) {
-          const result = await phonesCol.updateMany(
-            { family: model.family },
-            { 
-              $set: { 
-                imageUrl: model.imageUrl,
-                updatedAt: new Date()
-              } 
-            }
-          );
-          if (result.modifiedCount > 0) {
-            console.log('🔄 Güncellendi:', model.family, '- Yeni resim URL:', model.imageUrl);
-          }
-        }
-      }
     }
 
     // Tüm telefonları listele (her model tek kayıt)
