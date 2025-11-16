@@ -1,3 +1,88 @@
+// Initialization endpoint - create collections and indexes if missing
+const { connectToDatabase } = require('./lib/mongodb');
+
+module.exports = async (req, res) => {
+    // CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', 'application/json');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    if (req.method !== 'GET') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    try {
+        const { db } = await connectToDatabase();
+
+        const existingCollections = await db.listCollections().toArray();
+        const existingNames = new Set(existingCollections.map(c => c.name));
+
+        const created = [];
+        const ensuredIndexes = [];
+
+        // Ensure 'products' collection
+        if (!existingNames.has('products')) {
+            await db.createCollection('products');
+            created.push('products');
+        }
+        // Indexes for products
+        try {
+            const products = db.collection('products');
+            await products.createIndex({ createdAt: -1 }, { name: 'createdAt_desc' });
+            await products.createIndex({ name: 1 }, { name: 'name_asc' });
+            ensuredIndexes.push('products.createdAt_desc', 'products.name_asc');
+        } catch (e) {
+            // non-fatal
+        }
+
+        // Ensure 'visitors' collection (optional)
+        if (!existingNames.has('visitors')) {
+            await db.createCollection('visitors');
+            created.push('visitors');
+        }
+        try {
+            const visitors = db.collection('visitors');
+            await visitors.createIndex({ lastVisit: -1 }, { name: 'lastVisit_desc' });
+            await visitors.createIndex({ ip: 1 }, { name: 'ip_asc', unique: false });
+            ensuredIndexes.push('visitors.lastVisit_desc', 'visitors.ip_asc');
+        } catch (e) {
+            // non-fatal
+        }
+
+        // Ensure 'userSessions' (optional, online users)
+        if (!existingNames.has('userSessions')) {
+            await db.createCollection('userSessions');
+            created.push('userSessions');
+        }
+        try {
+            const userSessions = db.collection('userSessions');
+            await userSessions.createIndex({ lastResponseAt: -1 }, { name: 'lastResponseAt_desc' });
+            await userSessions.createIndex({ ip: 1 }, { name: 'ip_asc' });
+            ensuredIndexes.push('userSessions.lastResponseAt_desc', 'userSessions.ip_asc');
+        } catch (e) {
+            // non-fatal
+        }
+
+        return res.status(200).json({
+            success: true,
+            createdCollections: created,
+            ensuredIndexes
+        });
+    } catch (error) {
+        console.error('❌ init error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Initialization failed',
+            message: error.message
+        });
+    }
+};
+
 // MongoDB Collection'larını otomatik oluşturur ve başlangıç verilerini ekler
 const { connectToDatabase } = require('./lib/mongodb');
 
