@@ -107,7 +107,7 @@ const DEFAULT_PHONE_MODELS = [
   {
     family: 'iPhone 15 Pro Max',
     baseName: 'APPLE iPhone 15 Pro Max 5G',
-    imageUrl: 'https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_161554000/fee_786_587_png',
+    imageUrl: './images/iphone-15-pro-max-Photoroom.png',
     storageOptions: [
       { storage: '256 GB', realPrice: 1399, discountedPrice: 1299 },
       { storage: '512 GB', realPrice: 1599, discountedPrice: 1499 },
@@ -121,7 +121,7 @@ const DEFAULT_PHONE_MODELS = [
   {
     family: 'iPhone 15 Pro',
     baseName: 'APPLE iPhone 15 Pro 5G',
-    imageUrl: 'https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_161554000/fee_786_587_png',
+    imageUrl: './images/iphone-15-pro-Photoroom.png',
     storageOptions: [
       { storage: '256 GB', realPrice: 1299, discountedPrice: 1199 },
       { storage: '512 GB', realPrice: 1499, discountedPrice: 1399 },
@@ -135,7 +135,7 @@ const DEFAULT_PHONE_MODELS = [
   {
     family: 'iPhone 15',
     baseName: 'APPLE iPhone 15 5G',
-    imageUrl: 'https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_161554000/fee_786_587_png',
+    imageUrl: './images/iphone-15-duz-Photoroom.png',
     storageOptions: [
       { storage: '256 GB', realPrice: 999, discountedPrice: 949 },
       { storage: '512 GB', realPrice: 1199, discountedPrice: 1149 },
