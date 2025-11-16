@@ -223,32 +223,43 @@ async function loadActivities() {
 
 // Ürün listesi
 let products = [];
+let editingProductId = null;
 
 function renderProductsTable() {
     const tbody = document.getElementById('productsTableBody');
     if (!tbody) return;
 
     if (!products || products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Henüz ürün yok</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Henüz ürün yok</td></tr>';
         return;
     }
 
-    tbody.innerHTML = products.map(product => `
-        <tr>
-            <td>${product.name || '-'}</td>
-            <td>${product.category || '-'}</td>
-            <td>${product.realPrice != null ? product.realPrice.toFixed(2) + ' ₺' : '-'}</td>
-            <td>${product.discountedPrice != null ? product.discountedPrice.toFixed(2) + ' ₺' : '-'}</td>
-            <td>${product.discountPercent != null ? product.discountPercent.toFixed(2) + ' %' : '-'}</td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = products.map(p => {
+        const rp = p.realPrice != null ? p.realPrice.toFixed(2) + ' ₺' : '-';
+        const dp = p.discountedPrice != null ? p.discountedPrice.toFixed(2) + ' ₺' : '-';
+        const disc = p.discountPercent != null ? p.discountPercent.toFixed(2) + ' %' : '-';
+        const yr = (p.rating != null ? p.rating.toFixed(1) : '-') + ' / ' + (p.reviews || 0);
+        return `
+            <tr>
+                <td>${p.name || '-'}</td>
+                <td>${rp}</td>
+                <td>${dp}</td>
+                <td>${disc}</td>
+                <td>${yr}</td>
+                <td>
+                    <button class="btn-view" onclick="editProduct('${p._id}')">Düzenle</button>
+                    <button class="btn-danger" onclick="deleteProduct('${p._id}')" style="margin-left:6px;">Sil</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
 async function loadProducts() {
     console.log('🔄 Ürünler yükleniyor (API)...');
     const tbody = document.getElementById('productsTableBody');
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="5" class="loading">Yükleniyor...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="loading">Yükleniyor...</td></tr>';
     }
 
     try {
@@ -273,7 +284,7 @@ async function loadProducts() {
     } catch (error) {
         console.error('❌ Ürünler yüklenirken hata:', error);
         if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Ürünler yüklenirken bir hata oluştu</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Ürünler yüklenirken bir hata oluştu</td></tr>';
         }
     }
 }
@@ -325,24 +336,30 @@ function addProductFromForm() {
         category: '-' // Şimdilik sabit, sonra kategori alanı eklenebilir
     };
 
-    // API'ye kaydet
-    fetch('/api/products', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+    // API'ye kaydet (ekleme veya güncelleme)
+    const isEdit = !!editingProductId;
+    const url = isEdit ? `/api/products?id=${editingProductId}` : '/api/products';
+    const method = isEdit ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(product)
     })
     .then(async (res) => {
-        console.log('📡 /api/products POST status:', res.status);
+        console.log(`📡 /api/products ${method} status:`, res.status);
         const data = await res.json().catch(() => ({}));
-        console.log('📡 /api/products POST response:', data);
+        console.log(`📡 /api/products ${method} response:`, data);
 
-        if (!res.ok || !data.success) {
+        if (!res.ok || (method === 'POST' && !data.success)) {
             throw new Error(data.message || 'Ürün kaydedilirken bir hata oluştu');
         }
 
-        console.log('✅ Ürün başarıyla kaydedildi:', data.product);
+        if (method === 'POST') {
+            console.log('✅ Ürün başarıyla kaydedildi:', data.product);
+        } else {
+            console.log('✅ Ürün güncellendi');
+        }
 
         // Formu temizle
         nameEl.value = '';
@@ -352,6 +369,13 @@ function addProductFromForm() {
         imageEl.value = '';
         ratingEl.value = '';
         reviewsEl.value = '';
+
+        // Edit moddan çık
+        editingProductId = null;
+        const btn = document.getElementById('btnAddProduct');
+        if (btn) btn.textContent = '➕ Ürün Ekle';
+        const cancelBtn = document.getElementById('btnCancelEdit');
+        if (cancelBtn) cancelBtn.style.display = 'none';
 
         // Listeleri tekrar yükle
         loadProducts();
@@ -529,6 +553,31 @@ document.addEventListener('DOMContentLoaded', () => {
             addProductFromForm();
         });
     }
+    // Edit iptal butonu
+    let cancelBtn = document.getElementById('btnCancelEdit');
+    if (!cancelBtn) {
+        cancelBtn = document.createElement('button');
+        cancelBtn.id = 'btnCancelEdit';
+        cancelBtn.textContent = 'İptal';
+        cancelBtn.className = 'btn-danger';
+        cancelBtn.style.marginLeft = '10px';
+        cancelBtn.style.display = 'none';
+        const btnWrap = document.getElementById('btnAddProduct')?.parentElement;
+        if (btnWrap) btnWrap.appendChild(cancelBtn);
+    }
+    cancelBtn.addEventListener('click', () => {
+        editingProductId = null;
+        document.getElementById('productNameInput').value = '';
+        document.getElementById('realPriceInput').value = '';
+        document.getElementById('discountedPriceInput').value = '';
+        document.getElementById('discountPercentInput').value = '';
+        document.getElementById('productImageInput').value = '';
+        document.getElementById('productRatingInput').value = '';
+        document.getElementById('productReviewsInput').value = '';
+        const btn = document.getElementById('btnAddProduct');
+        if (btn) btn.textContent = '➕ Ürün Ekle';
+        cancelBtn.style.display = 'none';
+    });
 
     // İlk yükleme
     loadPurchases();

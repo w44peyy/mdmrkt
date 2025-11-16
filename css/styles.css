@@ -380,8 +380,13 @@ body {
   margin-left: 6px;
 }
 
+.black-week-product-uvp-raw {
+  color: #b3b3b3;
+  font-size: 12px;
+}
+
 .black-week-product-shipping {
-  color: #9ae6a9;
+  color: #b3b3b3;
   font-size: 12px;
   text-decoration: underline;
   margin-top: 6px;
@@ -421,6 +426,29 @@ body {
   color: #b3b3b3;
   font-size: 12px;
   margin-left: 6px;
+}
+
+.black-week-datasheet {
+  color: #ffffff;
+  text-decoration: underline;
+  font-size: 12px;
+  display: inline-block;
+  margin-top: 8px;
+  margin-right: 8px;
+}
+
+.energy-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.energy-badge.energy-a {
+  background: #0b8a3b; /* yeşil */
 }
 
 .black-week-products-empty {

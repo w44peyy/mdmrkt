@@ -113,6 +113,69 @@ module.exports = async (req, res) => {
         }
     }
 
+    if (req.method === 'PUT') {
+        try {
+            const { db } = await connectToDatabase();
+            const id = req.query.id;
+            if (!id) {
+                return res.status(400).json({ error: 'Eksik id' });
+            }
+
+            const {
+                name,
+                realPrice,
+                discountedPrice,
+                discountPercent,
+                imageUrl,
+                rating,
+                reviews,
+                isActive
+            } = req.body || {};
+
+            const update = {
+                $set: {
+                    updatedAt: new Date()
+                }
+            };
+
+            if (name != null) update.$set.name = String(name);
+            if (realPrice != null && !Number.isNaN(parseFloat(realPrice))) update.$set.realPrice = parseFloat(realPrice);
+            if (discountedPrice != null && !Number.isNaN(parseFloat(discountedPrice))) update.$set.discountedPrice = parseFloat(discountedPrice);
+            if (discountPercent != null && !Number.isNaN(parseFloat(discountPercent))) update.$set.discountPercent = parseFloat(discountPercent);
+            if (imageUrl != null) update.$set.imageUrl = String(imageUrl);
+            if (rating != null && !Number.isNaN(parseFloat(rating))) update.$set.rating = parseFloat(rating);
+            if (reviews != null && !Number.isNaN(parseInt(reviews, 10))) update.$set.reviews = parseInt(reviews, 10);
+            if (isActive != null) update.$set.isActive = !!isActive;
+
+            const result = await db.collection('products').updateOne(
+                { _id: require('mongodb').ObjectId.createFromHexString(id) },
+                update
+            );
+
+            return res.status(200).json({ success: true, modifiedCount: result.modifiedCount });
+        } catch (error) {
+            console.error('❌ Products PUT error:', error);
+            return res.status(500).json({ error: 'Veritabanı hatası', message: error.message });
+        }
+    }
+
+    if (req.method === 'DELETE') {
+        try {
+            const { db } = await connectToDatabase();
+            const id = req.query.id;
+            if (!id) {
+                return res.status(400).json({ error: 'Eksik id' });
+            }
+            const result = await db.collection('products').deleteOne({
+                _id: require('mongodb').ObjectId.createFromHexString(id)
+            });
+            return res.status(200).json({ success: true, deletedCount: result.deletedCount });
+        } catch (error) {
+            console.error('❌ Products DELETE error:', error);
+            return res.status(500).json({ error: 'Veritabanı hatası', message: error.message });
+        }
+    }
+
     return res.status(405).json({ error: 'Method not allowed' });
 };
 

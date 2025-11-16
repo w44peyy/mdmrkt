@@ -116,9 +116,10 @@
                         (rating != null ? '<div class="black-week-stars">' + renderStars(rating) + (reviews ? '<span class="black-week-reviews">' + reviews + '</span>' : '') + '</div>' : '') +
                         '<div class="black-week-product-prices">' +
                             (discountPercent !== null ? '<span class="black-week-product-discount-badge">-' + discountPercent + '%</span>' : '') +
-                            (realPrice ? '<span class="black-week-product-uvp">UVP ' + realPrice + '</span>' : '') +
+                            (realPrice ? '<span class="black-week-product-uvp">UVP ' + realPrice + '</span><br><br><span class="black-week-product-uvp-raw">' + realPrice + '</span>' : '') +
                             (discountedPrice ? '<div class="black-week-product-discounted-price">' + discountedPrice + '</div>' : '') +
                             '<a href="#" class="black-week-product-shipping">inkl. MwSt. versandkostenfrei</a>' +
+                            '<div><a href="#" class="black-week-datasheet">Produktdatenblatt</a><span class="energy-badge energy-a">A</span></div>' +
                         '</div>' +
                     '</div>'
                 );
