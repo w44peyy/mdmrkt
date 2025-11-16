@@ -393,7 +393,7 @@ body {
   z-index: 1;
 }
 
-/* Görsel wrapper */
+/* Görsel wrapper - Optimize edilmiş, her boyutta resim düzgün görünür */
 .black-week-product-image-wrapper {
   width: 100%;
   border-radius: 8px;
@@ -402,17 +402,31 @@ body {
   background: #111111;
   box-sizing: border-box;
   position: relative;
-  padding-top: 100%;
+  padding-top: 100%; /* 1:1 aspect ratio - kare container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .black-week-product-image-wrapper img {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  object-position: center;
   display: block;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  image-rendering: high-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 /* Ürün ismi */
