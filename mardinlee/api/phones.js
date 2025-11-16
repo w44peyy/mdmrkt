@@ -49,7 +49,7 @@ const DEFAULT_PHONE_MODELS = [
   {
     family: 'iPhone 17',
     baseName: 'APPLE iPhone 17 5G',
-    imageUrl: 'https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_161554000/fee_786_587_png',
+    imageUrl: 'https://assets.mmsrg.com/isr/166325/c1/-/ASSET_MMS_161522915?x=536&y=402&format=jpg&quality=80&sp=yes&strip=yes&trim&ex=536&ey=402&align=center&resizesource&unsharp=1.5x1+0.7+0.02&cox=0&coy=0&cdx=536&cdy=402',
     storageOptions: [
       { storage: '256 GB', realPrice: 1199, discountedPrice: 1099 },
       { storage: '512 GB', realPrice: 1399, discountedPrice: 1299 },
