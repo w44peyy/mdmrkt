@@ -221,6 +221,88 @@ async function loadActivities() {
     }
 }
 
+// Basit ürün listesi (şimdilik sadece frontend'de tutuluyor)
+let products = [];
+
+function renderProductsTable() {
+    const tbody = document.getElementById('productsTableBody');
+    if (!tbody) return;
+
+    if (!products || products.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Henüz ürün yok</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = products.map(product => `
+        <tr>
+            <td>${product.name || '-'}</td>
+            <td>${product.category || '-'}</td>
+            <td>${product.realPrice != null ? product.realPrice.toFixed(2) + ' ₺' : '-'}</td>
+            <td>${product.discountedPrice != null ? product.discountedPrice.toFixed(2) + ' ₺' : '-'}</td>
+            <td>${product.discountPercent != null ? product.discountPercent.toFixed(2) + ' %' : '-'}</td>
+        </tr>
+    `).join('');
+}
+
+async function loadProducts() {
+    console.log('🔄 Ürünler yükleniyor (lokal liste)...');
+    renderProductsTable();
+}
+
+function addProductFromForm() {
+    const nameEl = document.getElementById('productNameInput');
+    const realPriceEl = document.getElementById('realPriceInput');
+    const discountedPriceEl = document.getElementById('discountedPriceInput');
+    const discountPercentEl = document.getElementById('discountPercentInput');
+    const imageEl = document.getElementById('productImageInput');
+
+    if (!nameEl || !realPriceEl || !discountedPriceEl || !discountPercentEl || !imageEl) {
+        console.error('❌ Ürün form elemanları bulunamadı');
+        return;
+    }
+
+    const name = nameEl.value.trim();
+    const realPrice = parseFloat(realPriceEl.value);
+    const discountedPrice = parseFloat(discountedPriceEl.value);
+    let discountPercent = parseFloat(discountPercentEl.value);
+    const imageUrl = imageEl.value.trim();
+
+    if (!name || isNaN(realPrice) || isNaN(discountedPrice)) {
+        alert('Lütfen ürün adı, gerçek fiyat ve indirimli fiyat alanlarını doldurun');
+        return;
+    }
+
+    // Eğer indirim yüzdesi boşsa, otomatik hesapla
+    if (isNaN(discountPercent)) {
+        if (realPrice > 0) {
+            discountPercent = ((realPrice - discountedPrice) / realPrice) * 100;
+        } else {
+            discountPercent = 0;
+        }
+    }
+
+    const product = {
+        name,
+        realPrice,
+        discountedPrice,
+        discountPercent,
+        imageUrl,
+        category: '-' // Şimdilik sabit, sonra kategori alanı eklenebilir
+    };
+
+    products.push(product);
+    console.log('✅ Ürün eklendi:', product);
+
+    renderProductsTable();
+
+    // Formu temizle
+    nameEl.value = '';
+    realPriceEl.value = '';
+    discountedPriceEl.value = '';
+    discountPercentEl.value = '';
+    imageEl.value = '';
+}
+
 // Load Visitors
 async function loadVisitors() {
     const tbody = document.getElementById('visitorsTableBody');
@@ -322,6 +404,8 @@ async function clearVisitors() {
 window.loadPurchases = loadPurchases;
 window.loadVisitors = loadVisitors;
 window.clearVisitors = clearVisitors;
+window.loadProducts = loadProducts;
+window.addProductFromForm = addProductFromForm;
 
 // Initialize - Sayfa yüklendiğinde çalışır
 document.addEventListener('DOMContentLoaded', () => {
@@ -360,6 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (section === 'visitors') {
                 console.log('🔄 Ziyaretçiler yükleniyor (navigation)...');
                 loadVisitors();
+            } else if (section === 'products') {
+                console.log('🔄 Ürünler yükleniyor (navigation)...');
+                loadProducts();
             } else if (section === 'purchases') {
                 console.log('🔄 Satın almalar yükleniyor (navigation)...');
                 loadPurchases();
@@ -374,6 +461,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('✅ Navigation event listener\'lar eklendi');
     
+    // Ürün ekle butonu
+    const btnAddProduct = document.getElementById('btnAddProduct');
+    if (btnAddProduct) {
+        btnAddProduct.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('➕ Ürün ekle butonuna basıldı');
+            addProductFromForm();
+        });
+    }
+
     // İlk yükleme
     loadPurchases();
     loadStats();

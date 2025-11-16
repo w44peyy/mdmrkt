@@ -98,7 +98,19 @@
             <section id="products" class="content-section">
                 <div class="section-header">
                     <h1>Ürünler</h1>
-                    <!-- İleride filtre / ekleme butonları buraya gelecek -->
+                </div>
+
+                <!-- Ürün Oluşturma Formu -->
+                <div class="form-grid" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="productNameInput" placeholder="Ürün Adı" />
+                    <input type="number" id="realPriceInput" placeholder="Gerçek Fiyat" step="0.01" min="0" />
+                    <input type="number" id="discountedPriceInput" placeholder="İndirimli Fiyat" step="0.01" min="0" />
+                    <input type="number" id="discountPercentInput" placeholder="İndirim Yüzdesi (%)" step="0.01" min="0" max="100" />
+                    <input type="text" id="productImageInput" placeholder="Ürün Resmi (Link Formatı)" />
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <button class="btn-refresh" id="btnAddProduct">➕ Ürün Ekle</button>
                 </div>
                 
                 <div class="table-container">
