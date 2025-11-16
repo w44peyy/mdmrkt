@@ -1423,6 +1423,75 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
 
 
 
+  <!-- Dinamik telefon bilgileri ve storage seçenekleri -->
+  <script>
+  (function() {
+    // URL'den slug parametresini al
+    var urlParams = new URLSearchParams(window.location.search);
+    var slug = urlParams.get('slug');
+    
+    if (!slug) {
+      console.warn('⚠️ Slug parametresi bulunamadı');
+      return;
+    }
+    
+    console.log('📱 Telefon yükleniyor, slug:', slug);
+    
+    // API'den telefon bilgilerini çek
+    fetch('/api/phones?slug=' + encodeURIComponent(slug))
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(phone) {
+        console.log('✅ Telefon bilgileri alındı:', phone);
+        
+        // Başlık ve meta bilgilerini güncelle
+        if (phone.baseName) {
+          document.title = phone.baseName + ' | MediaMarkt';
+          var metaDesc = document.querySelector('meta[name="description"]');
+          if (metaDesc) {
+            metaDesc.setAttribute('content', phone.description || phone.baseName + ' im Onlineshop von MediaMarkt kaufen.');
+          }
+        }
+        
+        // Storage seçeneklerini göster (eğer storage seçenekleri varsa)
+        if (phone.storageOptions && phone.storageOptions.length > 0) {
+          // Storage seçenekleri için bir container oluştur veya mevcut bir yere ekle
+          // Bu kısım phone-product.html'in yapısına göre özelleştirilmeli
+          // Şimdilik console'a yazdırıyoruz, sonra HTML'e entegre edilebilir
+          console.log('💾 Storage seçenekleri:', phone.storageOptions);
+          
+          // Örnek: Storage seçeneklerini bir div'e ekle
+          var storageContainer = document.createElement('div');
+          storageContainer.id = 'phone-storage-options';
+          storageContainer.style.cssText = 'padding: 20px; background: #000; color: #fff; margin: 20px 0;';
+          storageContainer.innerHTML = '<h3 style="color: #fff; margin-bottom: 15px;">Speicherkapazität wählen:</h3>' +
+            phone.storageOptions.map(function(opt) {
+              return '<div style="padding: 10px; margin: 5px 0; border: 1px solid #333; cursor: pointer; border-radius: 5px;" ' +
+                     'onmouseover="this.style.borderColor=\'#f91f1f\'" ' +
+                     'onmouseout="this.style.borderColor=\'#333\'">' +
+                     '<strong>' + opt.storage + '</strong><br>' +
+                     '<span style="text-decoration: line-through; color: #888;">UVP ' + opt.realPrice.toFixed(2) + ' €</span> ' +
+                     '<span style="color: #f91f1f; font-size: 1.2em; font-weight: bold;">' + opt.discountedPrice.toFixed(2) + ' €</span> ' +
+                     '<span style="background: #f91f1f; padding: 2px 6px; border-radius: 3px; font-size: 0.9em;">-' + Math.round(opt.discountPercent) + '%</span>' +
+                     '</div>';
+            }).join('');
+          
+          // Storage container'ı sayfaya ekle (örnek: body'nin başına veya belirli bir yere)
+          var mainContent = document.querySelector('body') || document.body;
+          if (mainContent) {
+            // İlk child'dan önce ekle (veya istediğin yere)
+            mainContent.insertBefore(storageContainer, mainContent.firstChild);
+          }
+        }
+      })
+      .catch(function(err) {
+        console.error('❌ Telefon bilgileri yüklenemedi:', err);
+      });
+  })();
+  </script>
+  
   </body>
   <!-- checkScript -->
 </html>

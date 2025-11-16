@@ -106,7 +106,11 @@
                     return stars;
                 }
 
+                // Telefonlar için slug linki, normal ürünler için #
+                var productLink = p.slug ? 'phone-product.html?slug=' + encodeURIComponent(p.slug) : '#';
+                
                 return (
+                    '<a href="' + productLink + '" style="text-decoration: none; color: inherit; display: block;">' +
                     '<div class="black-week-product-card">' +
                         '<div class="black-week-badge">Black Week Deal</div>' +
                         '<div class="black-week-product-image-wrapper">' +
@@ -121,7 +125,8 @@
                             '<a href="#" class="black-week-product-shipping">inkl. MwSt. versandkostenfrei</a>' +
                             (p.datasheetEnabled ? '<div><a href="#" class="black-week-datasheet">Produktdatenblatt</a><span class="energy-badge energy-' + ((p.energyClass || "A").toLowerCase()) + '">'+ (p.energyClass || 'A') +'</span></div>' : '') +
                         '</div>' +
-                    '</div>'
+                    '</div>' +
+                    '</a>'
                 );
             }).join('');
         }
