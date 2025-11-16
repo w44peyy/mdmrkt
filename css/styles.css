@@ -282,6 +282,7 @@ body {
   margin: 32px 0 24px 0;
   padding: 0;
   box-sizing: border-box;
+  margin-left: 0;
 }
 
 /* Mobilde padding */
@@ -291,10 +292,18 @@ body {
   }
 }
 
-/* Desktop'ta sadece sağdan padding - ilk ürün en sola yapışsın */
+/* Desktop'ta padding yok - tamamen en sola yapışık */
 @media (min-width: 768px) {
   .black-week-highlights-section {
-    padding: 0 16px 0 0;
+    padding: 0;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
   }
 }
 
@@ -303,10 +312,11 @@ body {
   padding: 0 8px;
 }
 
-/* Desktop'ta header padding */
+/* Desktop'ta header padding yok - en sola yapışık */
 @media (min-width: 768px) {
   .black-week-highlights-header {
     padding: 0 16px 0 0;
+    margin-left: 0;
   }
 }
 
@@ -328,6 +338,9 @@ body {
   gap: 10px;
   width: 100%;
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  margin-left: 0;
 }
 
 /* Tablet - 4 sütun */
@@ -368,6 +381,16 @@ body {
   width: 100%;
   text-decoration: none;
   color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+/* Desktop'ta grid padding yok - ilk ürün en sola yapışık */
+@media (min-width: 768px) {
+  .black-week-products-grid {
+    padding-left: 0;
+    padding-right: 16px;
+  }
 }
 
 /* Ürün kartı */
