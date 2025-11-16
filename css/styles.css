@@ -359,14 +359,9 @@ body {
   }
 }
 
-/* Link wrapper */
-.black-week-products-grid > a {
-  display: block;
-  width: 100%;
-  text-decoration: none;
-  color: inherit;
-  margin: 0;
-  padding: 0;
+/* Ürün kartı direkt grid item olarak */
+.black-week-products-grid > .black-week-product-card {
+  display: flex;
 }
 
 /* Ürün kartı */

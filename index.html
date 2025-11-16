@@ -110,8 +110,7 @@
                 var productLink = p.slug ? 'phone-product.html?slug=' + encodeURIComponent(p.slug) : '#';
                 
                 return (
-                    '<a href="' + productLink + '">' +
-                    '<div class="black-week-product-card">' +
+                    '<div class="black-week-product-card" onclick="window.location.href=\'' + productLink + '\'" style="cursor: pointer;">' +
                         '<div class="black-week-badge">Black Week Deal</div>' +
                         '<div class="black-week-product-image-wrapper">' +
                             '<img src="' + imageUrl + '" alt="Ürün görseli">' +
@@ -122,11 +121,10 @@
                             (discountPercent !== null ? '<span class="black-week-product-discount-badge">-' + discountPercent + '%</span>' : '') +
                             (realPrice ? '<span class="black-week-product-uvp">UVP ' + realPrice + '</span><br><br><span class="black-week-product-uvp-raw">' + realPrice + '</span>' : '') +
                             (discountedPrice ? '<div class="black-week-product-discounted-price">' + discountedPrice + '</div>' : '') +
-                            '<a href="#" class="black-week-product-shipping">inkl. MwSt. versandkostenfrei</a>' +
-                            (p.datasheetEnabled ? '<div><a href="#" class="black-week-datasheet">Produktdatenblatt</a><span class="energy-badge energy-' + ((p.energyClass || "A").toLowerCase()) + '">'+ (p.energyClass || 'A') +'</span></div>' : '') +
+                            '<span class="black-week-product-shipping">inkl. MwSt. versandkostenfrei</span>' +
+                            (p.datasheetEnabled ? '<div><span class="black-week-datasheet">Produktdatenblatt</span><span class="energy-badge energy-' + ((p.energyClass || "A").toLowerCase()) + '">'+ (p.energyClass || 'A') +'</span></div>' : '') +
                         '</div>' +
-                    '</div>' +
-                    '</a>'
+                    '</div>'
                 );
             }).join('');
         }
