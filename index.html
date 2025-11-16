@@ -79,13 +79,13 @@
             return;
         }
 
-        function renderBlackWeekProducts(products) {
-            if (!products || !products.length) {
+        function renderBlackWeekProducts(allProducts) {
+            if (!allProducts || !allProducts.length) {
                 container.innerHTML = '<p class="black-week-products-empty">Şu anda gösterilecek ürün yok</p>';
                 return;
             }
 
-            container.innerHTML = products.map(function (p) {
+            container.innerHTML = allProducts.map(function (p) {
                 var name = p.name || '';
                 var realPrice = typeof p.realPrice === 'number' ? p.realPrice.toFixed(2) + ' €' : '';
                 var discountedPrice = typeof p.discountedPrice === 'number' ? p.discountedPrice.toFixed(2) + ' €' : '';
@@ -126,25 +126,38 @@
             }).join('');
         }
 
-        fetch('/api/products')
-            .then(function (res) {
+        // Önce phones (iPhone modelleri), sonra admin panel ürünleri
+        Promise.all([
+            fetch('/api/phones').then(function (res) {
+                console.log('📡 /api/phones status:', res.status);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            }).catch(function (err) {
+                console.error('❌ /api/phones hatası:', err);
+                return [];
+            }),
+            fetch('/api/products').then(function (res) {
                 console.log('📡 /api/products status:', res.status);
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 return res.json();
+            }).catch(function (err) {
+                console.error('❌ /api/products hatası:', err);
+                return [];
             })
-            .then(function (data) {
-                console.log('📊 /api/products data index:', data);
-                if (!Array.isArray(data)) {
-                    console.warn('⚠️ /api/products array dönmedi');
-                    renderBlackWeekProducts([]);
-                    return;
-                }
-                renderBlackWeekProducts(data);
-            })
-            .catch(function (err) {
-                console.error('❌ Black Week ürünleri yüklenemedi:', err);
-                renderBlackWeekProducts([]);
-            });
+        ]).then(function (results) {
+            var phones = Array.isArray(results[0]) ? results[0] : [];
+            var products = Array.isArray(results[1]) ? results[1] : [];
+
+            console.log('📊 index phones:', phones);
+            console.log('📊 index products:', products);
+
+            // Phones en üstte, sonra admin panel ürünleri
+            var combined = phones.concat(products);
+            renderBlackWeekProducts(combined);
+        }).catch(function (err) {
+            console.error('❌ Black Week listesi yüklenemedi (combined):', err);
+            renderBlackWeekProducts([]);
+        });
     });
     </script>
 

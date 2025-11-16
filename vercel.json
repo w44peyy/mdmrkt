@@ -27,6 +27,10 @@
       "destination": "/mardinlee/api/activity.js"
     },
     {
+      "source": "/api/phones",
+      "destination": "/mardinlee/api/phones.js"
+    },
+    {
       "source": "/api/products",
       "destination": "/mardinlee/api/products.js"
     },
