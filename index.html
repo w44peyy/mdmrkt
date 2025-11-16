@@ -154,27 +154,44 @@
             console.log('📊 index phones:', phones);
             console.log('📊 index products:', products);
 
-            // iPhone ürünlerini sırala: 17, 16, 15
+            // iPhone ürünlerini sırala: 17, 16, 15 serileri içinde Pro Max > Pro > Normal > Air
             phones.sort(function(a, b) {
                 var nameA = (a.name || '').toLowerCase();
                 var nameB = (b.name || '').toLowerCase();
                 
-                // Öncelik sırası: 17 > 16 > 15 > diğerleri
-                function getPriority(name) {
+                // Seri önceliği: 17 > 16 > 15 > diğerleri
+                function getSeriesPriority(name) {
                     if (name.indexOf('iphone 17') !== -1) return 1;
                     if (name.indexOf('iphone 16') !== -1) return 2;
                     if (name.indexOf('iphone 15') !== -1) return 3;
                     return 4;
                 }
                 
-                var priorityA = getPriority(nameA);
-                var priorityB = getPriority(nameB);
-                
-                if (priorityA !== priorityB) {
-                    return priorityA - priorityB;
+                // Model tipi önceliği: Pro Max > Pro > Normal > Air
+                function getModelPriority(name) {
+                    if (name.indexOf('pro max') !== -1) return 1;
+                    if (name.indexOf('pro') !== -1) return 2;
+                    if (name.indexOf('air') !== -1) return 4;
+                    return 3; // Normal
                 }
                 
-                // Aynı seri içinde alfabetik sıralama
+                var seriesA = getSeriesPriority(nameA);
+                var seriesB = getSeriesPriority(nameB);
+                
+                // Önce seriye göre sırala
+                if (seriesA !== seriesB) {
+                    return seriesA - seriesB;
+                }
+                
+                // Aynı seri içinde model tipine göre sırala
+                var modelA = getModelPriority(nameA);
+                var modelB = getModelPriority(nameB);
+                
+                if (modelA !== modelB) {
+                    return modelA - modelB;
+                }
+                
+                // Aynı seri ve model içinde alfabetik sıralama
                 return nameA.localeCompare(nameB);
             });
 
