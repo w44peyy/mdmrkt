@@ -9,7 +9,7 @@ const DEFAULT_PHONE_MODELS = [
     baseName: 'APPLE iPhone 17 Pro Max 5G 256 GB',
     imageUrl: './images/iphone-17-pro-max-Photoroom.png',
     storageOptions: [
-      { storage: '256 GB', realPrice: 1894, discountedPrice: 1600 },
+      { storage: '256 GB', realPrice: 1894, discountedPrice: 1500 },
       { storage: '512 GB', realPrice: 1999, discountedPrice: 1800 },
       { storage: '1 TB', realPrice: 2199, discountedPrice: 1900 },
       { storage: '2 TB', realPrice: 2300, discountedPrice: 2000 }
@@ -23,7 +23,7 @@ const DEFAULT_PHONE_MODELS = [
     baseName: 'APPLE iPhone 17 Pro 5G',
     imageUrl: './images/iphone-17-pro-Photoroom.png',
     storageOptions: [
-      { storage: '256 GB', realPrice: 1710, discountedPrice: 1499 },
+      { storage: '256 GB', realPrice: 1710, discountedPrice: 1399 },
       { storage: '512 GB', realPrice: 1899, discountedPrice: 1701 },
       { storage: '1 TB', realPrice: 2000, discountedPrice: 1799 },
       { storage: '2 TB', realPrice: 2199, discountedPrice: 1899 }
@@ -80,7 +80,7 @@ const DEFAULT_PHONE_MODELS = [
     baseName: 'APPLE iPhone 16 Pro 5G',
     imageUrl: './images/iphone-16-pro-Photoroom.png',
     storageOptions: [
-      { storage: '256 GB', realPrice: 1399, discountedPrice: 1299 },
+      { storage: '256 GB', realPrice: 1399, discountedPrice: 1099 },
       { storage: '512 GB', realPrice: 1599, discountedPrice: 1499 },
       { storage: '1 TB', realPrice: 1799, discountedPrice: 1699 },
       { storage: '2 TB', realPrice: 1999, discountedPrice: 1899 }
@@ -94,7 +94,7 @@ const DEFAULT_PHONE_MODELS = [
     baseName: 'APPLE iPhone 16 5G',
     imageUrl: './images/iphone-16-duz-Photoroom.png',
     storageOptions: [
-      { storage: '256 GB', realPrice: 849, discountedPrice: 699 },
+      { storage: '256 GB', realPrice: 849, discountedPrice: 599 },
       { storage: '512 GB', realPrice: 1099, discountedPrice: 899 },
       { storage: '1 TB', realPrice: 1199, discountedPrice: 1099 },
       { storage: '2 TB', realPrice: 1299, discountedPrice: 1199 }
