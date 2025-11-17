@@ -1775,26 +1775,43 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           if (phone.colorOptions && phone.colorOptions.length > 0) {
             console.log('🎨 ColorOptions bulundu:', phone.colorOptions.length, 'renk', phone.colorOptions);
             
-            // sc-66506eb5-0 dzunfB elementini bul - retry mekanizması ile
-            var targetElement = null;
-            var retryCount = 0;
-            var maxRetries = 5;
+            // descriptionElement'i kullan (zaten bulunmuş)
+            var targetElement = descriptionElement;
             
-            function findAndAddColorOptions() {
-              targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
-                             document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
-                             document.querySelector('.dzunfB');
+            // Eğer descriptionElement yoksa, retry mekanizması ile bul
+            if (!targetElement) {
+              var retryCount = 0;
+              var maxRetries = 10;
               
-              console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
-              
-              if (!targetElement && retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(findAndAddColorOptions, 200);
-                return;
+              function findTargetElement() {
+                targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
+                               document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
+                               document.querySelector('.dzunfB');
+                
+                console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
+                
+                if (!targetElement && retryCount < maxRetries) {
+                  retryCount++;
+                  setTimeout(findTargetElement, 300);
+                  return;
+                }
+                
+                if (targetElement) {
+                  addColorOptions();
+                } else {
+                  console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
+                }
               }
               
+              findTargetElement();
+            } else {
+              // descriptionElement bulundu, direkt ekle
+              addColorOptions();
+            }
+            
+            function addColorOptions() {
               if (!targetElement) {
-                console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
+                console.error('❌ Target element yok, renk seçenekleri eklenemiyor');
                 return;
               }
               
@@ -1814,7 +1831,7 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               var colorContainer = document.createElement('div');
               colorContainer.setAttribute('data-test', 'mms-pdp-variants-color');
               colorContainer.className = 'mms-pdp-variants-color';
-              colorContainer.style.cssText = 'margin-top: 16px; margin-bottom: 16px; padding: 16px 0; display: block;';
+              colorContainer.style.cssText = 'margin-top: 16px !important; margin-bottom: 16px !important; padding: 16px 0 !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: 100% !important;';
               
               // Başlık ekle
               var colorTitle = document.createElement('h3');
@@ -1936,18 +1953,29 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                     console.log('✅ Container parent:', addedElement.parentElement);
                     console.log('✅ Container next sibling:', addedElement.nextSibling);
                     console.log('✅ Container previous sibling:', addedElement.previousSibling);
+                    console.log('✅ Container offsetHeight:', addedElement.offsetHeight);
+                    console.log('✅ Container offsetWidth:', addedElement.offsetWidth);
+                    console.log('✅ Container computed display:', window.getComputedStyle(addedElement).display);
+                    console.log('✅ Container computed visibility:', window.getComputedStyle(addedElement).visibility);
+                    console.log('✅ Container computed opacity:', window.getComputedStyle(addedElement).opacity);
+                    
+                    // Eğer görünmüyorsa, parent'ı kontrol et
+                    if (addedElement.offsetHeight === 0 || addedElement.offsetWidth === 0) {
+                      console.warn('⚠️ Container görünmüyor! Parent kontrol ediliyor...');
+                      if (addedElement.parentElement) {
+                        console.log('✅ Parent offsetHeight:', addedElement.parentElement.offsetHeight);
+                        console.log('✅ Parent computed display:', window.getComputedStyle(addedElement.parentElement).display);
+                      }
+                    }
                   } else {
                     console.error('❌ Renk container DOM\'da bulunamadı!');
                   }
-                }, 100);
+                }, 500);
               } catch (error) {
                 console.error('❌ Renk container eklenirken hata:', error);
               }
               }
             }
-            
-            // İlk denemeyi başlat
-            findAndAddColorOptions();
           } else {
             console.warn('⚠️ ColorOptions yok veya boş (ilk blok):', phone.colorOptions);
           }
@@ -2076,26 +2104,43 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
         if (phone.colorOptions && phone.colorOptions.length > 0) {
           console.log('🎨 ColorOptions bulundu:', phone.colorOptions.length, 'renk', phone.colorOptions);
           
-          // sc-66506eb5-0 dzunfB elementini bul - retry mekanizması ile
-          var targetElement = null;
-          var retryCount = 0;
-          var maxRetries = 5;
+          // descriptionElement'i kullan (zaten bulunmuş)
+          var targetElement = descriptionElement;
           
-          function findAndAddColorOptions() {
-            targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
-                           document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
-                           document.querySelector('.dzunfB');
+          // Eğer descriptionElement yoksa, retry mekanizması ile bul
+          if (!targetElement) {
+            var retryCount = 0;
+            var maxRetries = 10;
             
-            console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
-            
-            if (!targetElement && retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(findAndAddColorOptions, 200);
-              return;
+            function findTargetElement() {
+              targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
+                             document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
+                             document.querySelector('.dzunfB');
+              
+              console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
+              
+              if (!targetElement && retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(findTargetElement, 300);
+                return;
+              }
+              
+              if (targetElement) {
+                addColorOptions();
+              } else {
+                console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
+              }
             }
             
+            findTargetElement();
+          } else {
+            // descriptionElement bulundu, direkt ekle
+            addColorOptions();
+          }
+          
+          function addColorOptions() {
             if (!targetElement) {
-              console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
+              console.error('❌ Target element yok, renk seçenekleri eklenemiyor');
               return;
             }
             
@@ -2115,7 +2160,7 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             var colorContainer = document.createElement('div');
             colorContainer.setAttribute('data-test', 'mms-pdp-variants-color');
             colorContainer.className = 'mms-pdp-variants-color';
-            colorContainer.style.cssText = 'margin-top: 16px; margin-bottom: 16px; padding: 16px 0; display: block;';
+            colorContainer.style.cssText = 'margin-top: 16px !important; margin-bottom: 16px !important; padding: 16px 0 !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: 100% !important;';
             
             // Başlık ekle
             var colorTitle = document.createElement('h3');
@@ -2237,18 +2282,29 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                   console.log('✅ Container parent:', addedElement.parentElement);
                   console.log('✅ Container next sibling:', addedElement.nextSibling);
                   console.log('✅ Container previous sibling:', addedElement.previousSibling);
+                  console.log('✅ Container offsetHeight:', addedElement.offsetHeight);
+                  console.log('✅ Container offsetWidth:', addedElement.offsetWidth);
+                  console.log('✅ Container computed display:', window.getComputedStyle(addedElement).display);
+                  console.log('✅ Container computed visibility:', window.getComputedStyle(addedElement).visibility);
+                  console.log('✅ Container computed opacity:', window.getComputedStyle(addedElement).opacity);
+                  
+                  // Eğer görünmüyorsa, parent'ı kontrol et
+                  if (addedElement.offsetHeight === 0 || addedElement.offsetWidth === 0) {
+                    console.warn('⚠️ Container görünmüyor! Parent kontrol ediliyor...');
+                    if (addedElement.parentElement) {
+                      console.log('✅ Parent offsetHeight:', addedElement.parentElement.offsetHeight);
+                      console.log('✅ Parent computed display:', window.getComputedStyle(addedElement.parentElement).display);
+                    }
+                  }
                 } else {
                   console.error('❌ Renk container DOM\'da bulunamadı!');
                 }
-              }, 100);
+              }, 500);
             } catch (error) {
               console.error('❌ Renk container eklenirken hata:', error);
             }
             }
           }
-          
-          // İlk denemeyi başlat
-          findAndAddColorOptions();
         } else {
           console.warn('⚠️ ColorOptions yok veya boş:', phone.colorOptions);
         }
