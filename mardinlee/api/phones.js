@@ -16,7 +16,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.9,
     reviews: 120,
-    description: 'Maximale Performance mit A19 Pro Chip, ProMotion Display und der besten Kamera, die es je in einem iPhone gab – ideal für Power‑User und Content‑Creator.'
+    description: 'Maximale Performance mit A19 Pro Chip, ProMotion Display und der besten Kamera, die es je in einem iPhone gab – ideal für Power‑User und Content‑Creator.',
+    displayDiagonale: '6,9 Zoll',
+    betriebssystem: 'iOS 18',
+    prozessor: 'A19 Pro Chip'
   },
   {
     family: 'iPhone 17 Pro',
@@ -30,7 +33,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.8,
     reviews: 110,
-    description: 'Pro‑Leistung im kompakten Format – A19 Pro Chip, ProMotion Display und eine starke Triple‑Kamera für Fotos und Videos auf Studio‑Niveau.'
+    description: 'Pro‑Leistung im kompakten Format – A19 Pro Chip, ProMotion Display und eine starke Triple‑Kamera für Fotos und Videos auf Studio‑Niveau.',
+    displayDiagonale: '6,3 Zoll',
+    betriebssystem: 'iOS 18',
+    prozessor: 'A19 Pro Chip'
   },
   {
     family: 'iPhone 17 Air',
@@ -44,7 +50,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.7,
     reviews: 90,
-    description: 'Ultraleichtes Design mit starker Performance – ideal für alle, die ein schlankes iPhone mit moderner Technik bevorzugen.'
+    description: 'Ultraleichtes Design mit starker Performance – ideal für alle, die ein schlankes iPhone mit moderner Technik bevorzugen.',
+    displayDiagonale: '6,1 Zoll',
+    betriebssystem: 'iOS 18',
+    prozessor: 'A19 Chip'
   },
   {
     family: 'iPhone 17',
@@ -58,7 +67,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.6,
     reviews: 80,
-    description: 'Der ideale Einstieg in die 17er‑Generation – starke Kamera, flüssiges Display und zuverlässige Performance für den Alltag.'
+    description: 'Der ideale Einstieg in die 17er‑Generation – starke Kamera, flüssiges Display und zuverlässige Performance für den Alltag.',
+    displayDiagonale: '6,1 Zoll',
+    betriebssystem: 'iOS 18',
+    prozessor: 'A19 Chip'
   },
   // 16 serisi
   {
@@ -73,7 +85,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.8,
     reviews: 150,
-    description: 'Pro‑Leistung mit großem Display, ideal für Filme, Games und Produktivität unterwegs.'
+    description: 'Pro‑Leistung mit großem Display, ideal für Filme, Games und Produktivität unterwegs.',
+    displayDiagonale: '6,9 Zoll',
+    betriebssystem: 'iOS 18',
+    prozessor: 'A18 Pro Chip'
   },
   {
     family: 'iPhone 16 Pro',
@@ -87,7 +102,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.8,
     reviews: 140,
-    description: 'Kompaktes Pro‑Modell mit starker Kamera und Top‑Performance für Arbeit und Freizeit.'
+    description: 'Kompaktes Pro‑Modell mit starker Kamera und Top‑Performance für Arbeit und Freizeit.',
+    displayDiagonale: '6,3 Zoll',
+    betriebssystem: 'iOS 18',
+    prozessor: 'A18 Pro Chip'
   },
   {
     family: 'iPhone 16',
@@ -101,7 +119,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.5,
     reviews: 100,
-    description: 'Der ausgewogene Allrounder – moderne Kamera, flüssiges System und genug Speicher für den Alltag.'
+    description: 'Der ausgewogene Allrounder – moderne Kamera, flüssiges System und genug Speicher für den Alltag.',
+    displayDiagonale: '6,1 Zoll',
+    betriebssystem: 'iOS 18',
+    prozessor: 'A18 Chip'
   },
   // 15 serisi
   {
@@ -116,7 +137,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.7,
     reviews: 200,
-    description: 'Titan‑Design, lange Akkulaufzeit und starke Kamera – ideal für anspruchsvolle Nutzer.'
+    description: 'Titan‑Design, lange Akkulaufzeit und starke Kamera – ideal für anspruchsvolle Nutzer.',
+    displayDiagonale: '6,7 Zoll',
+    betriebssystem: 'iOS 17',
+    prozessor: 'A17 Pro Chip'
   },
   {
     family: 'iPhone 15 Pro',
@@ -130,7 +154,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.7,
     reviews: 180,
-    description: 'Leistungsstarkes Pro‑Modell im handlichen Format – ideal für den täglichen Einsatz.'
+    description: 'Leistungsstarkes Pro‑Modell im handlichen Format – ideal für den täglichen Einsatz.',
+    displayDiagonale: '6,1 Zoll',
+    betriebssystem: 'iOS 17',
+    prozessor: 'A17 Pro Chip'
   },
   {
     family: 'iPhone 15',
@@ -144,7 +171,10 @@ const DEFAULT_PHONE_MODELS = [
     ],
     rating: 4.6,
     reviews: 220,
-    description: 'Starker Einstieg in die 15er‑Generation – ideale Mischung aus Preis, Leistung und Kamera.'
+    description: 'Starker Einstieg in die 15er‑Generation – ideale Mischung aus Preis, Leistung und Kamera.',
+    displayDiagonale: '6,1 Zoll',
+    betriebssystem: 'iOS 17',
+    prozessor: 'A16 Bionic Chip'
   }
 ];
 
@@ -179,6 +209,9 @@ function toDoc(model) {
     rating: model.rating,
     reviews: model.reviews,
     description: model.description,
+    displayDiagonale: model.displayDiagonale || '',
+    betriebssystem: model.betriebssystem || '',
+    prozessor: model.prozessor || '',
     datasheetEnabled: true,
     energyClass: 'A',
     category: 'phone',
