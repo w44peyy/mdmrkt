@@ -1926,6 +1926,52 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           } else {
             console.warn('⚠️ pdp-gallery-image elementi bulunamadı');
           }
+          
+          // Slider preview/thumbnail'ları güncelle - mms-skeleton-block-item içindeki slider
+          var skeletonBlock = document.querySelector('[data-test="mms-skeleton-block-item"]') ||
+                              document.querySelector('.mms-skeleton-block-item') ||
+                              document.querySelector('[class*="skeleton-block"]');
+          
+          if (skeletonBlock) {
+            // Slider dots/thumbnails'ı bul - önce slider dots'ları dene
+            var sliderDots = skeletonBlock.querySelectorAll('ul[data-test="mms-scroll-snap-slider-dots"] li');
+            
+            // Eğer bulunamazsa alternatif seçicileri dene
+            if (!sliderDots || sliderDots.length === 0) {
+              sliderDots = skeletonBlock.querySelectorAll('.sc-68628bc4-0.iaSkMG');
+            }
+            if (!sliderDots || sliderDots.length === 0) {
+              sliderDots = skeletonBlock.querySelectorAll('button[class*="iaSkMG"]');
+            }
+            if (!sliderDots || sliderDots.length === 0) {
+              sliderDots = skeletonBlock.querySelectorAll('li button');
+            }
+            
+            if (sliderDots && sliderDots.length > 0) {
+              // Her thumbnail'a aynı görseli ekle
+              sliderDots.forEach(function(thumbnail) {
+                var thumbnailImg = thumbnail.querySelector('img');
+                if (thumbnailImg) {
+                  thumbnailImg.src = phone.imageUrl;
+                } else {
+                  // Eğer img yoksa, background-image olarak ayarla
+                  thumbnail.style.backgroundImage = 'url(' + phone.imageUrl + ')';
+                  thumbnail.style.backgroundSize = 'cover';
+                  thumbnail.style.backgroundPosition = 'center';
+                }
+              });
+              console.log('✅ Slider preview\'leri güncellendi:', sliderDots.length, 'thumbnail');
+            } else {
+              // Eğer thumbnail yapısı farklıysa, tüm mms-skeleton-block-item içindeki img'leri güncelle
+              var allImages = skeletonBlock.querySelectorAll('img');
+              if (allImages && allImages.length > 0) {
+                allImages.forEach(function(img) {
+                  img.src = phone.imageUrl;
+                });
+                console.log('✅ mms-skeleton-block-item içindeki tüm görseller güncellendi:', allImages.length, 'görsel');
+              }
+            }
+          }
         }
       }
       
