@@ -1569,32 +1569,19 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               existingStorageOptions.remove();
             }
             
-            // Gizlenen "Speicherkapazität" bölümünü bul ve yerine storage container'ı ekle
-            var oldStorageSection = document.querySelector('.sc-28072e66-2.lbLdin');
-            console.log('🔍 Eski storage bölümü aranıyor:', oldStorageSection);
-            
-            // Önce root veya main content alanını bul
-            var rootElement = document.getElementById('root') || document.getElementById('mms-app-root') || document.body;
-            console.log('🔍 Root element bulundu:', rootElement);
-            
-            if (oldStorageSection && oldStorageSection.parentNode) {
-              console.log('✅ Eski storage bölümü bulundu, yerine yeni container ekleniyor');
-              // Eski bölümün yerine yeni storage container'ı ekle
-              oldStorageSection.parentNode.insertBefore(storageContainer, oldStorageSection);
-              // Eski bölümü tamamen kaldır
-              oldStorageSection.remove();
-            } else {
-              console.log('⚠️ Eski storage bölümü bulunamadı, root element başına ekleniyor');
-              // Root element'in başına ekle (body'nin ilk child'ından önce)
-              if (rootElement && rootElement.firstChild) {
-                rootElement.insertBefore(storageContainer, rootElement.firstChild);
-                console.log('✅ Storage container root element başına eklendi');
-              } else if (rootElement) {
-                rootElement.appendChild(storageContainer);
-                console.log('✅ Storage container root element sonuna eklendi');
+            // Storage container'ı sayfanın en üstüne ekle (body'nin başına)
+            var bodyElement = document.body;
+            if (bodyElement) {
+              // Body'nin ilk child'ından önce ekle
+              if (bodyElement.firstChild) {
+                bodyElement.insertBefore(storageContainer, bodyElement.firstChild);
+                console.log('✅ Storage container sayfanın en üstüne eklendi (body başına)');
               } else {
-                console.error('❌ Root element bulunamadı!');
+                bodyElement.appendChild(storageContainer);
+                console.log('✅ Storage container body'ye eklendi');
               }
+            } else {
+              console.error('❌ Body elementi bulunamadı!');
             }
             
             console.log('📦 Storage container oluşturuldu ve eklendi:', storageContainer);

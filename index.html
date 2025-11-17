@@ -143,19 +143,32 @@
                 );
             }).join('');
             
-            // Ürün kartlarına tıklama event listener'ı ekle
-            setTimeout(function() {
-                var productCards = container.querySelectorAll('.black-week-product-card[data-href]');
-                productCards.forEach(function(card) {
-                    card.addEventListener('click', function(e) {
-                        var href = this.getAttribute('data-href');
-                        if (href && href !== '#') {
-                            console.log('🔗 Ürün kartına tıklandı, yönlendiriliyor:', href);
-                            window.location.href = href;
-                        }
-                    });
-                });
-            }, 100);
+            // Ürün kartlarına tıklama event listener'ı ekle (event delegation kullanarak daha güvenilir)
+            container.addEventListener('click', function(e) {
+                // Tıklanan element veya parent'ı black-week-product-card mı kontrol et
+                var target = e.target;
+                var card = null;
+                
+                // Parent element'leri kontrol et
+                while (target && target !== container) {
+                    if (target.classList && target.classList.contains('black-week-product-card')) {
+                        card = target;
+                        break;
+                    }
+                    target = target.parentElement;
+                }
+                
+                if (card) {
+                    var href = card.getAttribute('data-href');
+                    if (href && href !== '#') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🔗 Ürün kartına tıklandı, yönlendiriliyor:', href);
+                        window.location.href = href;
+                        return false;
+                    }
+                }
+            });
         }
 
         // Önce phones (iPhone modelleri), sonra admin panel ürünleri
