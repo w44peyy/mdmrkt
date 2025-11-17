@@ -1930,23 +1930,33 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
   (function() {
     console.log('🚀 Ürün bilgileri script başlatıldı');
     
-    // Tıklama event listener'ı
+    // Tıklama event listener'ı - capture phase'de çalışsın
     document.addEventListener('click', function(e) {
+      console.log('🖱️ Tıklama algılandı, target:', e.target);
+      console.log('🖱️ Target classList:', e.target.classList ? Array.from(e.target.classList) : 'yok');
+      
       var target = e.target;
       var clickedElement = null;
       
       // Tıklanan element veya parent'ında sc-94eb08bc-0 ve dRmOMv class'ları var mı kontrol et
-      while (target && target !== document.body) {
+      var depth = 0;
+      while (target && target !== document.body && depth < 10) {
         if (target.classList) {
+          var classList = Array.from(target.classList);
           var hasSc = target.classList.contains('sc-94eb08bc-0');
           var hasDrm = target.classList.contains('dRmOMv');
+          
+          console.log('🔍 Depth', depth, 'classList:', classList, 'hasSc:', hasSc, 'hasDrm:', hasDrm);
+          
           if (hasSc && hasDrm) {
             clickedElement = target;
             console.log('✅ Tıklanan element bulundu:', clickedElement);
+            console.log('✅ Element classList:', Array.from(clickedElement.classList));
             break;
           }
         }
         target = target.parentElement;
+        depth++;
       }
       
       if (clickedElement) {
