@@ -1749,6 +1749,20 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               }
             }
           });
+          
+          // Description - sc-94eb08bc-0 dRmOMv elementinin içindeki div'i bul ve güncelle
+          var descriptionElement = document.querySelector('.sc-94eb08bc-0.dRmOMv');
+          if (descriptionElement && phone.description) {
+            // İçindeki div'i bul veya direkt içeriği güncelle
+            var innerDiv = descriptionElement.querySelector('div');
+            if (innerDiv) {
+              innerDiv.textContent = phone.description;
+              console.log('✅ Description güncellendi:', phone.description);
+            } else {
+              descriptionElement.textContent = phone.description;
+              console.log('✅ Description güncellendi (direkt):', phone.description);
+            }
+          }
         } else {
           // sc-be471825-5 gdyQYk class'ına sahip elementleri güncelle
           specElements.forEach(function(el, index) {
@@ -1766,6 +1780,20 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               console.log('✅ Prozessor güncellendi:', phone.prozessor);
             }
           });
+        }
+        
+        // Description - sc-94eb08bc-0 dRmOMv elementinin içindeki div'i bul ve güncelle
+        var descriptionElement = document.querySelector('.sc-94eb08bc-0.dRmOMv');
+        if (descriptionElement && phone.description) {
+          // İçindeki div'i bul veya direkt içeriği güncelle
+          var innerDiv = descriptionElement.querySelector('div');
+          if (innerDiv) {
+            innerDiv.textContent = phone.description;
+            console.log('✅ Description güncellendi:', phone.description);
+          } else {
+            descriptionElement.textContent = phone.description;
+            console.log('✅ Description güncellendi (direkt):', phone.description);
+          }
         }
       }
       
