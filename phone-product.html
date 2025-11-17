@@ -1975,6 +1975,9 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           })
           .then(function(phone) {
             console.log('✅ Ürün bilgileri alındı:', phone);
+            console.log('📝 Description:', phone.description);
+            console.log('📝 Description var mı?', !!phone.description);
+            console.log('📝 Description tipi:', typeof phone.description);
             
             if (!phone) {
               alert('Ürün bilgisi bulunamadı.');
@@ -2003,7 +2006,12 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             }
             if (phone.description) {
               infoText += 'Beschreibung: ' + phone.description;
+              console.log('✅ Description eklendi:', phone.description);
+            } else {
+              console.warn('⚠️ Description bulunamadı veya boş');
             }
+            
+            console.log('📄 Oluşturulan metin:', infoText);
             
             // Tıklanan elementin içeriğini değiştir
             clickedElement.textContent = infoText;
