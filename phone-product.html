@@ -1451,6 +1451,13 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
     .lbLdin {
       display: none !important;
     }
+    
+    /* Storage container'ı görünür yap */
+    #phone-storage-options {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
   </style>
 
   <!-- Dinamik telefon bilgileri ve storage seçenekleri -->
@@ -1506,7 +1513,7 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             // Storage seçeneklerini bir div'e ekle
             var storageContainer = document.createElement('div');
             storageContainer.id = 'phone-storage-options';
-            storageContainer.style.cssText = 'padding: 20px; background: #000; color: #fff; margin: 20px 0; position: relative; z-index: 1000; width: 100%; box-sizing: border-box;';
+            storageContainer.style.cssText = 'padding: 20px; background: #000; color: #fff; margin: 20px 0; position: relative; z-index: 10000; width: 100%; box-sizing: border-box; display: block !important; visibility: visible !important; opacity: 1 !important;';
             storageContainer.innerHTML = '<h3 style="color: #fff; margin-bottom: 15px;">Speicherkapazität wählen:</h3>' +
               phone.storageOptions.map(function(opt) {
                 // İndirim yüzdesini hesapla
