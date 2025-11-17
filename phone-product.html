@@ -1771,72 +1771,52 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             }
           }
           
-          // Renk seçimi sistemi - sc-66506eb5-0 dzunfB elementinin altına ekle (ilk blok)
+          // Renk seçimi sistemi - sc-637a2157-0 jjtvgH div'ine ekle (ilk blok)
           if (phone.colorOptions && phone.colorOptions.length > 0) {
             console.log('🎨 ColorOptions bulundu:', phone.colorOptions.length, 'renk', phone.colorOptions);
             
-            // descriptionElement'i kullan (zaten bulunmuş)
-            var targetElement = descriptionElement;
+            // sc-637a2157-0 jjtvgH div'ini bul
+            var retryCount = 0;
+            var maxRetries = 10;
             
-            // Eğer descriptionElement yoksa, retry mekanizması ile bul
-            if (!targetElement) {
-              var retryCount = 0;
-              var maxRetries = 10;
+            function findAndAddColorOptions() {
+              var targetDiv = document.querySelector('.sc-637a2157-0.jjtvgH') ||
+                             document.querySelector('[class*="sc-637a2157-0"][class*="jjtvgH"]') ||
+                             document.querySelector('.jjtvgH');
               
-              function findTargetElement() {
-                targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
-                               document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
-                               document.querySelector('.dzunfB');
-                
-                console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
-                
-                if (!targetElement && retryCount < maxRetries) {
-                  retryCount++;
-                  setTimeout(findTargetElement, 300);
-                  return;
-                }
-                
-                if (targetElement) {
-                  addColorOptions();
-                } else {
-                  console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
-                }
-              }
+              console.log('🎨 Target div aranıyor (deneme ' + (retryCount + 1) + '):', targetDiv);
               
-              findTargetElement();
-            } else {
-              // descriptionElement bulundu, direkt ekle
-              addColorOptions();
-            }
-            
-            function addColorOptions() {
-              if (!targetElement) {
-                console.error('❌ Target element yok, renk seçenekleri eklenemiyor');
+              if (!targetDiv && retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(findAndAddColorOptions, 300);
                 return;
               }
               
-              console.log('✅ Target element bulundu:', targetElement, 'Parent:', targetElement.parentElement);
-            
+              if (!targetDiv) {
+                console.error('❌ Target div bulunamadı, tüm denemeler tükendi');
+                return;
+              }
+              
+              console.log('✅ Target div bulundu:', targetDiv);
+              
               // Mevcut renk seçimi container'ını kontrol et
-              var existingColorContainer = document.querySelector('[data-test="mms-pdp-variants-color"]') ||
-                                           document.querySelector('.mms-pdp-variants-color');
+              var existingColorContainer = targetDiv.querySelector('[data-test="mms-pdp-variants-color"]');
               
               if (existingColorContainer) {
                 console.log('✅ Renk seçimi container zaten mevcut (ilk blok)');
                 return;
               }
               
-              if (targetElement) {
-              // Container yoksa oluştur
+              // Container oluştur
               var colorContainer = document.createElement('div');
               colorContainer.setAttribute('data-test', 'mms-pdp-variants-color');
               colorContainer.className = 'mms-pdp-variants-color';
-              colorContainer.style.cssText = 'margin-top: 16px !important; margin-bottom: 16px !important; padding: 16px 0 !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: 100% !important;';
+              colorContainer.style.cssText = 'display: flex; flex-direction: column; gap: 0.75rem;';
               
               // Başlık ekle
               var colorTitle = document.createElement('h3');
               colorTitle.textContent = 'Farbe';
-              colorTitle.style.cssText = 'font-size: 1rem; font-weight: 600; margin: 0 0 12px 0; color: #000000; font-family: NotoSansDisplay, Arial, sans-serif;';
+              colorTitle.style.cssText = 'font-size: 0.875rem; font-weight: 600; margin: 0; color: #000000; font-family: NotoSansDisplay, Arial, sans-serif;';
               colorContainer.appendChild(colorTitle);
               
               // Renk seçenekleri container'ı
@@ -1851,7 +1831,7 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                 colorButton.type = 'button';
                 colorButton.setAttribute('data-color', colorOption.name);
                 colorButton.setAttribute('data-color-index', index);
-                colorButton.style.cssText = 'position: relative; border: 2px solid #e3e3e3; border-radius: 6px; padding: 4px; background: #ffffff; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; overflow: hidden;';
+                colorButton.style.cssText = 'position: relative; border: 2px solid #e3e3e3; border-radius: 6px; padding: 2px; background: #ffffff; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; overflow: hidden; flex-shrink: 0;';
                 
                 // Renk görseli - küçük fotoğraf
                 var colorImage = document.createElement('img');
@@ -1863,7 +1843,6 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                 // Image load error handling
                 colorImage.onerror = function() {
                   console.warn('⚠️ Renk görseli yüklenemedi:', colorOption.imageUrl);
-                  this.style.display = 'none';
                 };
                 colorImage.onload = function() {
                   console.log('✅ Renk görseli yüklendi:', colorOption.imageUrl);
@@ -1923,59 +1902,13 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               
               colorContainer.appendChild(colorOptionsWrapper);
               
-              // sc-66506eb5-0 dzunfB elementinin altına ekle - birden fazla yöntem dene
-              try {
-                if (targetElement && targetElement.parentElement) {
-                  // Yöntem 1: insertAdjacentElement
-                  targetElement.insertAdjacentElement('afterend', colorContainer);
-                  console.log('✅ Renk seçimi sistemi eklendi (afterend):', phone.colorOptions.length, 'renk');
-                } else if (targetElement && targetElement.nextSibling) {
-                  // Yöntem 2: insertBefore nextSibling
-                  targetElement.parentElement.insertBefore(colorContainer, targetElement.nextSibling);
-                  console.log('✅ Renk seçimi sistemi eklendi (insertBefore):', phone.colorOptions.length, 'renk');
-                } else if (targetElement) {
-                  // Yöntem 3: parentElement'e appendChild
-                  if (targetElement.parentElement) {
-                    targetElement.parentElement.appendChild(colorContainer);
-                    console.log('✅ Renk seçimi sistemi eklendi (appendChild):', phone.colorOptions.length, 'renk');
-                  } else {
-                    // Yöntem 4: body'ye ekle (son çare)
-                    document.body.appendChild(colorContainer);
-                    console.warn('⚠️ Parent bulunamadı, body\'ye eklendi');
-                  }
-                }
-                
-                // Eklenen elementi kontrol et
-                setTimeout(function() {
-                  var addedElement = document.querySelector('[data-test="mms-pdp-variants-color"]');
-                  if (addedElement) {
-                    console.log('✅ Renk container DOM\'da doğrulandı:', addedElement);
-                    console.log('✅ Container parent:', addedElement.parentElement);
-                    console.log('✅ Container next sibling:', addedElement.nextSibling);
-                    console.log('✅ Container previous sibling:', addedElement.previousSibling);
-                    console.log('✅ Container offsetHeight:', addedElement.offsetHeight);
-                    console.log('✅ Container offsetWidth:', addedElement.offsetWidth);
-                    console.log('✅ Container computed display:', window.getComputedStyle(addedElement).display);
-                    console.log('✅ Container computed visibility:', window.getComputedStyle(addedElement).visibility);
-                    console.log('✅ Container computed opacity:', window.getComputedStyle(addedElement).opacity);
-                    
-                    // Eğer görünmüyorsa, parent'ı kontrol et
-                    if (addedElement.offsetHeight === 0 || addedElement.offsetWidth === 0) {
-                      console.warn('⚠️ Container görünmüyor! Parent kontrol ediliyor...');
-                      if (addedElement.parentElement) {
-                        console.log('✅ Parent offsetHeight:', addedElement.parentElement.offsetHeight);
-                        console.log('✅ Parent computed display:', window.getComputedStyle(addedElement.parentElement).display);
-                      }
-                    }
-                  } else {
-                    console.error('❌ Renk container DOM\'da bulunamadı!');
-                  }
-                }, 500);
-              } catch (error) {
-                console.error('❌ Renk container eklenirken hata:', error);
-              }
-              }
+              // Target div'e ekle
+              targetDiv.appendChild(colorContainer);
+              console.log('✅ Renk seçimi sistemi eklendi (ilk blok):', phone.colorOptions.length, 'renk');
             }
+            
+            // İlk denemeyi başlat
+            findAndAddColorOptions();
           } else {
             console.warn('⚠️ ColorOptions yok veya boş (ilk blok):', phone.colorOptions);
           }
@@ -2100,72 +2033,52 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           }
         }
         
-        // Renk seçimi sistemi - sc-66506eb5-0 dzunfB elementinin altına ekle
+        // Renk seçimi sistemi - sc-637a2157-0 jjtvgH div'ine ekle
         if (phone.colorOptions && phone.colorOptions.length > 0) {
           console.log('🎨 ColorOptions bulundu:', phone.colorOptions.length, 'renk', phone.colorOptions);
           
-          // descriptionElement'i kullan (zaten bulunmuş)
-          var targetElement = descriptionElement;
+          // sc-637a2157-0 jjtvgH div'ini bul
+          var retryCount = 0;
+          var maxRetries = 10;
           
-          // Eğer descriptionElement yoksa, retry mekanizması ile bul
-          if (!targetElement) {
-            var retryCount = 0;
-            var maxRetries = 10;
+          function findAndAddColorOptions() {
+            var targetDiv = document.querySelector('.sc-637a2157-0.jjtvgH') ||
+                           document.querySelector('[class*="sc-637a2157-0"][class*="jjtvgH"]') ||
+                           document.querySelector('.jjtvgH');
             
-            function findTargetElement() {
-              targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
-                             document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
-                             document.querySelector('.dzunfB');
-              
-              console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
-              
-              if (!targetElement && retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(findTargetElement, 300);
-                return;
-              }
-              
-              if (targetElement) {
-                addColorOptions();
-              } else {
-                console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
-              }
-            }
+            console.log('🎨 Target div aranıyor (deneme ' + (retryCount + 1) + '):', targetDiv);
             
-            findTargetElement();
-          } else {
-            // descriptionElement bulundu, direkt ekle
-            addColorOptions();
-          }
-          
-          function addColorOptions() {
-            if (!targetElement) {
-              console.error('❌ Target element yok, renk seçenekleri eklenemiyor');
+            if (!targetDiv && retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(findAndAddColorOptions, 300);
               return;
             }
             
-            console.log('✅ Target element bulundu:', targetElement, 'Parent:', targetElement.parentElement);
-          
+            if (!targetDiv) {
+              console.error('❌ Target div bulunamadı, tüm denemeler tükendi');
+              return;
+            }
+            
+            console.log('✅ Target div bulundu:', targetDiv);
+            
             // Mevcut renk seçimi container'ını kontrol et
-            var existingColorContainer = document.querySelector('[data-test="mms-pdp-variants-color"]') ||
-                                         document.querySelector('.mms-pdp-variants-color');
+            var existingColorContainer = targetDiv.querySelector('[data-test="mms-pdp-variants-color"]');
             
             if (existingColorContainer) {
               console.log('✅ Renk seçimi container zaten mevcut');
               return;
             }
             
-            if (targetElement) {
-            // Container yoksa oluştur
+            // Container oluştur
             var colorContainer = document.createElement('div');
             colorContainer.setAttribute('data-test', 'mms-pdp-variants-color');
             colorContainer.className = 'mms-pdp-variants-color';
-            colorContainer.style.cssText = 'margin-top: 16px !important; margin-bottom: 16px !important; padding: 16px 0 !important; display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: 100% !important;';
+            colorContainer.style.cssText = 'display: flex; flex-direction: column; gap: 0.75rem;';
             
             // Başlık ekle
             var colorTitle = document.createElement('h3');
             colorTitle.textContent = 'Farbe';
-            colorTitle.style.cssText = 'font-size: 1rem; font-weight: 600; margin: 0 0 12px 0; color: #000000; font-family: NotoSansDisplay, Arial, sans-serif;';
+            colorTitle.style.cssText = 'font-size: 0.875rem; font-weight: 600; margin: 0; color: #000000; font-family: NotoSansDisplay, Arial, sans-serif;';
             colorContainer.appendChild(colorTitle);
             
             // Renk seçenekleri container'ı
@@ -2180,7 +2093,7 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               colorButton.type = 'button';
               colorButton.setAttribute('data-color', colorOption.name);
               colorButton.setAttribute('data-color-index', index);
-              colorButton.style.cssText = 'position: relative; border: 2px solid #e3e3e3; border-radius: 6px; padding: 4px; background: #ffffff; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; overflow: hidden;';
+              colorButton.style.cssText = 'position: relative; border: 2px solid #e3e3e3; border-radius: 6px; padding: 2px; background: #ffffff; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; overflow: hidden; flex-shrink: 0;';
               
               // Renk görseli - küçük fotoğraf
               var colorImage = document.createElement('img');
@@ -2192,7 +2105,6 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               // Image load error handling
               colorImage.onerror = function() {
                 console.warn('⚠️ Renk görseli yüklenemedi:', colorOption.imageUrl);
-                this.style.display = 'none';
               };
               colorImage.onload = function() {
                 console.log('✅ Renk görseli yüklendi:', colorOption.imageUrl);
@@ -2252,59 +2164,13 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             
             colorContainer.appendChild(colorOptionsWrapper);
             
-            // sc-66506eb5-0 dzunfB elementinin altına ekle - birden fazla yöntem dene
-            try {
-              if (targetElement && targetElement.parentElement) {
-                // Yöntem 1: insertAdjacentElement
-                targetElement.insertAdjacentElement('afterend', colorContainer);
-                console.log('✅ Renk seçimi sistemi eklendi (afterend):', phone.colorOptions.length, 'renk');
-              } else if (targetElement && targetElement.nextSibling) {
-                // Yöntem 2: insertBefore nextSibling
-                targetElement.parentElement.insertBefore(colorContainer, targetElement.nextSibling);
-                console.log('✅ Renk seçimi sistemi eklendi (insertBefore):', phone.colorOptions.length, 'renk');
-              } else if (targetElement) {
-                // Yöntem 3: parentElement'e appendChild
-                if (targetElement.parentElement) {
-                  targetElement.parentElement.appendChild(colorContainer);
-                  console.log('✅ Renk seçimi sistemi eklendi (appendChild):', phone.colorOptions.length, 'renk');
-                } else {
-                  // Yöntem 4: body'ye ekle (son çare)
-                  document.body.appendChild(colorContainer);
-                  console.warn('⚠️ Parent bulunamadı, body\'ye eklendi');
-                }
-              }
-              
-              // Eklenen elementi kontrol et
-              setTimeout(function() {
-                var addedElement = document.querySelector('[data-test="mms-pdp-variants-color"]');
-                if (addedElement) {
-                  console.log('✅ Renk container DOM\'da doğrulandı:', addedElement);
-                  console.log('✅ Container parent:', addedElement.parentElement);
-                  console.log('✅ Container next sibling:', addedElement.nextSibling);
-                  console.log('✅ Container previous sibling:', addedElement.previousSibling);
-                  console.log('✅ Container offsetHeight:', addedElement.offsetHeight);
-                  console.log('✅ Container offsetWidth:', addedElement.offsetWidth);
-                  console.log('✅ Container computed display:', window.getComputedStyle(addedElement).display);
-                  console.log('✅ Container computed visibility:', window.getComputedStyle(addedElement).visibility);
-                  console.log('✅ Container computed opacity:', window.getComputedStyle(addedElement).opacity);
-                  
-                  // Eğer görünmüyorsa, parent'ı kontrol et
-                  if (addedElement.offsetHeight === 0 || addedElement.offsetWidth === 0) {
-                    console.warn('⚠️ Container görünmüyor! Parent kontrol ediliyor...');
-                    if (addedElement.parentElement) {
-                      console.log('✅ Parent offsetHeight:', addedElement.parentElement.offsetHeight);
-                      console.log('✅ Parent computed display:', window.getComputedStyle(addedElement.parentElement).display);
-                    }
-                  }
-                } else {
-                  console.error('❌ Renk container DOM\'da bulunamadı!');
-                }
-              }, 500);
-            } catch (error) {
-              console.error('❌ Renk container eklenirken hata:', error);
-            }
-            }
+            // Target div'e ekle
+            targetDiv.appendChild(colorContainer);
+            console.log('✅ Renk seçimi sistemi eklendi:', phone.colorOptions.length, 'renk');
           }
+          
+          // İlk denemeyi başlat
+          findAndAddColorOptions();
         } else {
           console.warn('⚠️ ColorOptions yok veya boş:', phone.colorOptions);
         }
