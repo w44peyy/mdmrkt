@@ -1452,22 +1452,32 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       display: none !important;
     }
     
-    /* Storage container'ı görünür yap */
+    /* Storage container'ı görünür yap - sayfanın en üstünde */
     #phone-storage-options {
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
       position: relative !important;
-      z-index: 10000 !important;
+      z-index: 99999 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 20px !important;
+      background: #000 !important;
+      color: #fff !important;
+      box-sizing: border-box !important;
     }
     
     /* Parent element'lerin storage container'ı gizlemesini önle */
     #root #phone-storage-options,
     #mms-app-root #phone-storage-options,
-    body #phone-storage-options {
+    body #phone-storage-options,
+    body > #phone-storage-options {
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
+      position: relative !important;
+      z-index: 99999 !important;
     }
     
     /* Storage option item'ları görünür yap */
@@ -1475,6 +1485,7 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       display: block !important;
       visibility: visible !important;
       opacity: 1 !important;
+      color: #fff !important;
     }
     
     .storage-option-item:hover {
@@ -1486,50 +1497,52 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
   <!-- Dinamik telefon bilgileri ve storage seçenekleri -->
   <script>
   (function() {
-    // URL'den slug, storage ve prices parametrelerini al
-    var urlParams = new URLSearchParams(window.location.search);
-    var slug = urlParams.get('slug');
-    var currentStorage = urlParams.get('storage');
-    var pricesParam = urlParams.get('prices');
-    
-    console.log('🔍 URL Parametreleri:', {
-      slug: slug,
-      storage: currentStorage,
-      prices: pricesParam,
-      fullSearch: window.location.search
-    });
-    
-    if (!slug) {
-      console.warn('⚠️ Slug parametresi bulunamadı');
-      return;
-    }
-    
-    // Query string'den fiyatları parse et
-    var storageOptions = [];
-    if (pricesParam) {
-      // Format: 256GB-1299-1199,512GB-1499-1399,1TB-1699-1599,2TB-1899-1799
-      var priceParts = pricesParam.split(',');
-      priceParts.forEach(function(part) {
-        // Format: 256GB-1299-1199 veya 1TB-1699-1599
-        var match = part.match(/^(\d+)(GB|TB)-(\d+)-(\d+)$/);
-        if (match) {
-          var storageValue = match[1] + ' ' + match[2]; // "256 GB" veya "1 TB"
-          var realPrice = parseFloat(match[3]);
-          var discountedPrice = parseFloat(match[4]);
-          storageOptions.push({
-            storage: storageValue,
-            realPrice: realPrice,
-            discountedPrice: discountedPrice
-          });
-        }
+    // Sayfa yüklenene kadar bekle
+    function initStorageTable() {
+      // URL'den slug, storage ve prices parametrelerini al
+      var urlParams = new URLSearchParams(window.location.search);
+      var slug = urlParams.get('slug');
+      var currentStorage = urlParams.get('storage');
+      var pricesParam = urlParams.get('prices');
+      
+      console.log('🔍 URL Parametreleri:', {
+        slug: slug,
+        storage: currentStorage,
+        prices: pricesParam,
+        fullSearch: window.location.search
       });
-      console.log('💾 Query string\'den storage seçenekleri parse edildi:', storageOptions);
-    }
-    
-    console.log('📱 Telefon yükleniyor, slug:', slug, 'storage:', currentStorage);
-    
-    // Eğer query string'den fiyatlar gelmişse, direkt HTML'e ekle
-    if (storageOptions.length > 0) {
+      
+      if (!slug) {
+        console.warn('⚠️ Slug parametresi bulunamadı');
+        return;
+      }
+      
+      // Query string'den fiyatları parse et
+      var storageOptions = [];
+      if (pricesParam) {
+        // Format: 256GB-1299-1199,512GB-1499-1399,1TB-1699-1599,2TB-1899-1799
+        var priceParts = pricesParam.split(',');
+        priceParts.forEach(function(part) {
+          // Format: 256GB-1299-1199 veya 1TB-1699-1599
+          var match = part.match(/^(\d+)(GB|TB)-(\d+\.?\d*)-(\d+\.?\d*)$/);
+          if (match) {
+            var storageValue = match[1] + ' ' + match[2]; // "256 GB" veya "1 TB"
+            var realPrice = parseFloat(match[3]);
+            var discountedPrice = parseFloat(match[4]);
+            storageOptions.push({
+              storage: storageValue,
+              realPrice: realPrice,
+              discountedPrice: discountedPrice
+            });
+          }
+        });
+        console.log('💾 Query string\'den storage seçenekleri parse edildi:', storageOptions);
+      }
+      
+      console.log('📱 Telefon yükleniyor, slug:', slug, 'storage:', currentStorage);
+      
+      // Eğer query string'den fiyatlar gelmişse, direkt HTML'e ekle
+      if (storageOptions.length > 0) {
       // Başlık güncelle
       if (currentStorage) {
         var titleName = 'iPhone ' + slug.replace('iphone-', '').replace(/-/g, ' ') + ' ' + currentStorage;
@@ -1571,15 +1584,41 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       storageContainer.innerHTML = storageHTML;
       
       // Storage container'ı sayfanın en üstüne ekle (body'nin başına)
-      var bodyElement = document.body;
-      if (bodyElement) {
+      function addStorageContainer() {
+        var bodyElement = document.body;
+        if (!bodyElement) {
+          console.warn('⚠️ Body elementi henüz yüklenmemiş, tekrar denenecek...');
+          setTimeout(addStorageContainer, 100);
+          return;
+        }
+        
+        // Eğer daha önce eklenmişse kaldır
+        var existing = document.getElementById('phone-storage-options');
+        if (existing) {
+          existing.remove();
+        }
+        
+        // Body'nin en başına ekle
         if (bodyElement.firstChild) {
           bodyElement.insertBefore(storageContainer, bodyElement.firstChild);
-          console.log('✅ Storage container sayfanın en üstüne eklendi (query string\'den)');
         } else {
           bodyElement.appendChild(storageContainer);
-          console.log('✅ Storage container body\'ye eklendi (query string\'den)');
         }
+        
+        console.log('✅ Storage container sayfanın en üstüne eklendi (query string\'den)');
+        console.log('📦 Storage container görünürlük kontrolü:', {
+          display: window.getComputedStyle(storageContainer).display,
+          visibility: window.getComputedStyle(storageContainer).visibility,
+          opacity: window.getComputedStyle(storageContainer).opacity,
+          zIndex: window.getComputedStyle(storageContainer).zIndex
+        });
+      }
+      
+      // Hemen eklemeyi dene, eğer body yoksa bekle
+      if (document.body) {
+        addStorageContainer();
+      } else {
+        setTimeout(addStorageContainer, 100);
       }
       
       return; // Query string'den fiyatlar geldi, MongoDB'den çekmeye gerek yok
@@ -1653,34 +1692,57 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             
             storageContainer.innerHTML = storageHTML;
             
-            // Eğer daha önce oluşturulmuş bir phone-storage-options varsa kaldır
-            var existingStorageOptions = document.getElementById('phone-storage-options');
-            if (existingStorageOptions) {
-              existingStorageOptions.remove();
-            }
-            
             // Storage container'ı sayfanın en üstüne ekle (body'nin başına)
-            var bodyElement = document.body;
-            if (bodyElement) {
-              // Body'nin ilk child'ından önce ekle
+            function addStorageContainerMongo() {
+              var bodyElement = document.body;
+              if (!bodyElement) {
+                console.warn('⚠️ Body elementi henüz yüklenmemiş, tekrar denenecek...');
+                setTimeout(addStorageContainerMongo, 100);
+                return;
+              }
+              
+              // Eğer daha önce eklenmişse kaldır
+              var existing = document.getElementById('phone-storage-options');
+              if (existing) {
+                existing.remove();
+              }
+              
+              // Body'nin en başına ekle
               if (bodyElement.firstChild) {
                 bodyElement.insertBefore(storageContainer, bodyElement.firstChild);
-                console.log('✅ Storage container sayfanın en üstüne eklendi (body başına)');
               } else {
                 bodyElement.appendChild(storageContainer);
-                console.log('✅ Storage container body'ye eklendi');
               }
-            } else {
-              console.error('❌ Body elementi bulunamadı!');
+              
+              console.log('✅ Storage container sayfanın en üstüne eklendi (MongoDB\'den)');
+              console.log('📦 Storage container görünürlük kontrolü:', {
+                display: window.getComputedStyle(storageContainer).display,
+                visibility: window.getComputedStyle(storageContainer).visibility,
+                opacity: window.getComputedStyle(storageContainer).opacity,
+                zIndex: window.getComputedStyle(storageContainer).zIndex
+              });
             }
             
-            console.log('📦 Storage container oluşturuldu ve eklendi:', storageContainer);
-            console.log('📦 Storage container HTML:', storageContainer.outerHTML.substring(0, 300));
+            // Hemen eklemeyi dene, eğer body yoksa bekle
+            if (document.body) {
+              addStorageContainerMongo();
+            } else {
+              setTimeout(addStorageContainerMongo, 100);
+            }
           }
       })
       .catch(function(err) {
         console.error('❌ Telefon bilgileri yüklenemedi:', err);
       });
+    }
+    
+    // Sayfa yüklendiğinde çalıştır
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initStorageTable);
+    } else {
+      // Sayfa zaten yüklenmişse direkt çalıştır
+      initStorageTable();
+    }
   })();
   </script>
   
