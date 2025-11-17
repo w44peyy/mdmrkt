@@ -1492,11 +1492,192 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       border-color: #f91f1f !important;
       background-color: #1a1a1a !important;
     }
+    
+    /* Sticky mobile footer */
+    #mms-sticky-a2c-mobile {
+      all: unset;
+      box-sizing: border-box;
+      display: flex;
+      flex-flow: wrap;
+      -webkit-box-align: center;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 8px 5%;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #e3e3e3;
+      z-index: 9999;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    #mms-sticky-a2c-mobile > span {
+      display: none;
+    }
+    
+    @media (min-width: 752px) {
+      #mms-sticky-a2c-mobile {
+        display: none !important;
+      }
+    }
+    
+    #mms-sticky-a2c-mobile .sc-637a2157-0.imQMsS {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    
+    #mms-sticky-a2c-mobile .sc-637a2157-0.cMWysk {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+    }
+    
+    #mms-sticky-a2c-mobile .sc-94eb08bc-0.eXtDkj {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #000000;
+      font-family: MMHeadline, Arial, sans-serif;
+      white-space: nowrap;
+    }
+    
+    #mms-sticky-a2c-mobile .sc-92544267-0.fdulkt {
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    #mms-sticky-a2c-mobile .sc-836914d0-1.oNPNI {
+      width: 100%;
+      padding: 12px 24px;
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: NotoSansDisplay, Arial, sans-serif;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    #mms-sticky-a2c-mobile .sc-836914d0-1.oNPNI:hover {
+      background: #333333;
+    }
+    
+    #mms-sticky-a2c-mobile .sc-dcccc264-0.cRkYbI {
+      text-align: center;
+    }
+    
+    /* Body padding bottom for sticky footer */
+    @media (max-width: 751px) {
+      body {
+        padding-bottom: 70px;
+      }
+    }
   </style>
 
   <!-- Dinamik telefon bilgileri ve storage seçenekleri -->
   <script>
   (function() {
+    // Sticky footer oluştur ve güncelle (global function)
+    function createStickyFooter(initialPrice) {
+      // Mevcut sticky footer'ı kontrol et
+      var existingFooter = document.getElementById('mms-sticky-a2c-mobile');
+      if (existingFooter) {
+        updateStickyFooterPrice(initialPrice);
+        return;
+      }
+      
+      // Sticky footer oluştur
+      var stickyFooter = document.createElement('div');
+      stickyFooter.id = 'mms-sticky-a2c-mobile';
+      stickyFooter.className = 'sc-637a2157-0 bVnifc sc-dd1259ba-0 bchjvW';
+      stickyFooter.setAttribute('display', 'flex');
+      
+      // Boş span (kullanıcının verdiği HTML'de var)
+      var emptySpan = document.createElement('span');
+      stickyFooter.appendChild(emptySpan);
+      
+      // Fiyat container
+      var priceContainer = document.createElement('div');
+      priceContainer.setAttribute('display', 'flex');
+      priceContainer.setAttribute('data-test', 'cofr-price mms-price');
+      priceContainer.className = 'sc-637a2157-0 imQMsS';
+      
+      // Fiyat wrapper
+      var priceWrapper = document.createElement('div');
+      priceWrapper.setAttribute('display', 'flex');
+      priceWrapper.className = 'sc-637a2157-0 cMWysk notranslate';
+      
+      var priceSpan = document.createElement('span');
+      priceSpan.setAttribute('aria-hidden', 'true');
+      priceSpan.className = 'sc-94eb08bc-0 eXtDkj sc-8a3a8cd8-2 csCDkt';
+      priceSpan.id = 'sticky-footer-price';
+      priceSpan.textContent = Math.floor(initialPrice || 0).toString().replace('.', ',') + ' €';
+      
+      var priceSpanScreenReader = document.createElement('span');
+      priceSpanScreenReader.className = 'sc-e0c7d9f7-0 bPkjPs';
+      priceSpanScreenReader.textContent = Math.floor(initialPrice || 0).toString() + '€';
+      
+      priceWrapper.appendChild(priceSpan);
+      priceWrapper.appendChild(priceSpanScreenReader);
+      priceContainer.appendChild(priceWrapper);
+      
+      // Add to cart butonu
+      var addToCartContainer = document.createElement('div');
+      addToCartContainer.setAttribute('data-test', 'mms-cta-basket-wishlist');
+      addToCartContainer.className = 'sc-92544267-0 fdulkt';
+      
+      var addToCartButton = document.createElement('button');
+      addToCartButton.type = 'button';
+      addToCartButton.setAttribute('aria-disabled', 'false');
+      addToCartButton.className = 'sc-836914d0-1 oNPNI';
+      addToCartButton.setAttribute('translate', 'no');
+      addToCartButton.setAttribute('data-test', 'a2c-Button');
+      addToCartButton.setAttribute('data-ignore-a11y', 'true');
+      addToCartButton.setAttribute('aria-label', 'In den Warenkorb');
+      
+      var buttonText = document.createElement('span');
+      buttonText.className = 'sc-dcccc264-0 cRkYbI';
+      buttonText.textContent = 'In den Warenkorb';
+      addToCartButton.appendChild(buttonText);
+      
+      var buttonEmptySpan = document.createElement('span');
+      buttonEmptySpan.className = 'sc-f5b2dacb-0 hBMxtr';
+      addToCartButton.appendChild(buttonEmptySpan);
+      
+      addToCartContainer.appendChild(addToCartButton);
+      
+      stickyFooter.appendChild(priceContainer);
+      stickyFooter.appendChild(addToCartContainer);
+      
+      // Body'ye ekle
+      document.body.appendChild(stickyFooter);
+      console.log('✅ Sticky footer oluşturuldu');
+    }
+    
+    // Sticky footer fiyatını güncelle (global function)
+    function updateStickyFooterPrice(price) {
+      var stickyPrice = document.getElementById('sticky-footer-price');
+      var stickyPriceScreenReader = stickyPrice ? stickyPrice.nextElementSibling : null;
+      
+      if (stickyPrice) {
+        var priceValue = Math.floor(price);
+        stickyPrice.textContent = priceValue.toString().replace('.', ',') + ' €';
+        if (stickyPriceScreenReader && stickyPriceScreenReader.classList.contains('sc-e0c7d9f7-0')) {
+          stickyPriceScreenReader.textContent = priceValue.toString() + '€';
+        }
+        console.log('✅ Sticky footer fiyatı güncellendi:', priceValue.toString() + ' €');
+      }
+    }
+    
     // Sayfa yüklenene kadar bekle
     function initStorageTable() {
       // URL'den slug, storage ve prices parametrelerini al
@@ -1637,6 +1818,9 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               }
               
               console.log('✅ Fiyat storage seçeneğine göre güncellendi:', storageText, priceText);
+              
+              // Sticky footer fiyatını güncelle
+              updateStickyFooterPrice(selectedOption.discountedPrice);
             } else {
               console.warn('⚠️ Fiyat elementi bulunamadı');
             }
@@ -1651,6 +1835,35 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           }
         }
       });
+      
+      // İlk fiyatı bul ve sticky footer oluştur
+      var initialPrice = null;
+      if (storageOptions && storageOptions.length > 0) {
+        // URL'den storage parametresini al
+        var urlParams = new URLSearchParams(window.location.search);
+        var currentStorage = urlParams.get('storage');
+        
+        if (currentStorage) {
+          var selectedOption = storageOptions.find(function(opt) {
+            return opt.storage === currentStorage || (opt.storage && opt.storage.includes(currentStorage));
+          });
+          if (selectedOption) {
+            initialPrice = selectedOption.discountedPrice;
+          }
+        }
+        
+        // Eğer bulunamazsa ilk seçeneğin fiyatını kullan
+        if (!initialPrice && storageOptions[0]) {
+          initialPrice = storageOptions[0].discountedPrice;
+        }
+      }
+      
+      // Sticky footer'ı oluştur
+      if (initialPrice) {
+        setTimeout(function() {
+          createStickyFooter(initialPrice);
+        }, 500);
+      }
       
       // Storage container'ı mms-pdp-details-mainfeatures div'inin altına ekle
       var retryCount = 0;
@@ -2074,6 +2287,10 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                   }
                   
                   console.log('✅ Discounted price güncellendi (ilk blok):', priceText, '(element:', priceElement, ')');
+                  
+                  // Sticky footer fiyatını güncelle
+                  updateStickyFooterPrice(discountedPrice);
+                  
                   return true;
                 } else {
                   console.warn('⚠️ Discounted price bulunamadı (ilk blok), storageOptions:', phone.storageOptions);
@@ -2097,6 +2314,32 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                 }, 500);
               }
             }, 300);
+          }
+          
+          // Sticky footer oluştur (updatePhoneSpecs içinde)
+          var initialPriceSpecs = null;
+          if (phone.storageOptions && phone.storageOptions.length > 0) {
+            var urlParamsSpecs = new URLSearchParams(window.location.search);
+            var currentStorageSpecs = urlParamsSpecs.get('storage');
+            
+            if (currentStorageSpecs) {
+              var selectedOptionSpecs = phone.storageOptions.find(function(opt) {
+                return opt.storage === currentStorageSpecs || (opt.storage && opt.storage.includes(currentStorageSpecs));
+              });
+              if (selectedOptionSpecs) {
+                initialPriceSpecs = selectedOptionSpecs.discountedPrice;
+              }
+            }
+            
+            if (!initialPriceSpecs && phone.storageOptions[0]) {
+              initialPriceSpecs = phone.storageOptions[0].discountedPrice;
+            }
+          }
+          
+          if (initialPriceSpecs) {
+            setTimeout(function() {
+              createStickyFooter(initialPriceSpecs);
+            }, 800);
           }
         } else {
           // sc-be471825-5 gdyQYk class'ına sahip elementleri güncelle
@@ -2365,6 +2608,10 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                 }
                 
                 console.log('✅ Discounted price güncellendi:', priceText, '(element:', priceElement, ')');
+                
+                // Sticky footer fiyatını güncelle
+                updateStickyFooterPrice(discountedPrice);
+                
                 return true;
               } else {
                 console.warn('⚠️ Discounted price bulunamadı, storageOptions:', phone.storageOptions);
@@ -2388,6 +2635,32 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               }, 500);
             }
           }, 300);
+        }
+        
+        // Sticky footer oluştur (updatePhoneSpecs içinde - ikinci blok)
+        var initialPriceSpecs2 = null;
+        if (phone.storageOptions && phone.storageOptions.length > 0) {
+          var urlParamsSpecs2 = new URLSearchParams(window.location.search);
+          var currentStorageSpecs2 = urlParamsSpecs2.get('storage');
+          
+          if (currentStorageSpecs2) {
+            var selectedOptionSpecs2 = phone.storageOptions.find(function(opt) {
+              return opt.storage === currentStorageSpecs2 || (opt.storage && opt.storage.includes(currentStorageSpecs2));
+            });
+            if (selectedOptionSpecs2) {
+              initialPriceSpecs2 = selectedOptionSpecs2.discountedPrice;
+            }
+          }
+          
+          if (!initialPriceSpecs2 && phone.storageOptions[0]) {
+            initialPriceSpecs2 = phone.storageOptions[0].discountedPrice;
+          }
+        }
+        
+        if (initialPriceSpecs2) {
+          setTimeout(function() {
+            createStickyFooter(initialPriceSpecs2);
+          }, 800);
         }
         
         // Description - pdp-description-pim-fallback elementinin içindeki article'ı bul ve güncelle
@@ -2685,6 +2958,9 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                     }
                     
                     console.log('✅ Fiyat storage seçeneğine göre güncellendi:', storageText, priceText);
+                    
+                    // Sticky footer fiyatını güncelle
+                    updateStickyFooterPrice(selectedOption.discountedPrice);
                   } else {
                     console.warn('⚠️ Fiyat elementi bulunamadı');
                   }
@@ -2699,6 +2975,32 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                 }
               }
             });
+            
+            // Sticky footer oluştur ve güncelle (MongoDB'den gelen veriler için)
+            var initialPriceMongo = null;
+            if (phone.storageOptions && phone.storageOptions.length > 0) {
+              var urlParamsMongo = new URLSearchParams(window.location.search);
+              var currentStorageMongo = urlParamsMongo.get('storage');
+              
+              if (currentStorageMongo) {
+                var selectedOptionMongo = phone.storageOptions.find(function(opt) {
+                  return opt.storage === currentStorageMongo || (opt.storage && opt.storage.includes(currentStorageMongo));
+                });
+                if (selectedOptionMongo) {
+                  initialPriceMongo = selectedOptionMongo.discountedPrice;
+                }
+              }
+              
+              if (!initialPriceMongo && phone.storageOptions[0]) {
+                initialPriceMongo = phone.storageOptions[0].discountedPrice;
+              }
+            }
+            
+            if (initialPriceMongo) {
+              setTimeout(function() {
+                createStickyFooter(initialPriceMongo);
+              }, 500);
+            }
             
             // Storage container'ı mms-pdp-details-mainfeatures div'inin altına ekle
             var retryCountMongo = 0;
