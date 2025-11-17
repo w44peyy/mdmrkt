@@ -1781,52 +1781,81 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             }
           }
           
-          // Discounted price - branded-price-whole-value elementini bul ve güncelle
-          var priceElement = document.querySelector('.branded-price-whole-value');
-          if (priceElement && phone.storageOptions) {
-            // Önce 256 GB'ı bul
-            var discountedPrice = null;
-            var storage256GB = phone.storageOptions.find(function(opt) {
-              return opt.storage === '256 GB' || opt.storage === '256GB' || opt.storage.includes('256');
-            });
+          // Discounted price - branded-price-whole-value elementini bul ve güncelle (retry ile)
+          function updatePriceFirst() {
+            console.log('🔍 branded-price-whole-value elementi aranıyor (ilk blok)...');
+            var priceElement = document.querySelector('.branded-price-whole-value') ||
+                               document.querySelector('[class*="branded-price-whole-value"]') ||
+                               document.querySelector('[class*="price-whole"]') ||
+                               document.querySelector('[data-test*="price"]');
             
-            if (storage256GB) {
-              discountedPrice = storage256GB.discountedPrice;
-              console.log('✅ 256 GB storage bulundu, discounted price:', discountedPrice);
-            } else {
-              // Eğer 256 GB bulunamazsa, URL'den storage parametresini al
-              var urlParams = new URLSearchParams(window.location.search);
-              var currentStorage = urlParams.get('storage') || '';
+            if (priceElement) {
+              console.log('✅ branded-price-whole-value elementi bulundu (ilk blok):', priceElement);
               
-              if (currentStorage) {
-                var selectedOption = phone.storageOptions.find(function(opt) {
-                  return opt.storage === currentStorage || opt.storage.includes(currentStorage);
+              if (phone.storageOptions && phone.storageOptions.length > 0) {
+                console.log('📦 Storage options (ilk blok):', phone.storageOptions);
+                
+                // Önce 256 GB'ı bul
+                var discountedPrice = null;
+                var storage256GB = phone.storageOptions.find(function(opt) {
+                  return opt.storage === '256 GB' || opt.storage === '256GB' || (opt.storage && opt.storage.includes('256'));
                 });
-                if (selectedOption) {
-                  discountedPrice = selectedOption.discountedPrice;
-                  console.log('✅ URL\'den storage bulundu:', currentStorage, 'discounted price:', discountedPrice);
+                
+                if (storage256GB) {
+                  discountedPrice = storage256GB.discountedPrice;
+                  console.log('✅ 256 GB storage bulundu (ilk blok), discounted price:', discountedPrice);
+                } else {
+                  console.log('⚠️ 256 GB bulunamadı (ilk blok), alternatif aranıyor...');
+                  // Eğer 256 GB bulunamazsa, URL'den storage parametresini al
+                  var urlParams = new URLSearchParams(window.location.search);
+                  var currentStorage = urlParams.get('storage') || '';
+                  
+                  if (currentStorage) {
+                    var selectedOption = phone.storageOptions.find(function(opt) {
+                      return opt.storage === currentStorage || (opt.storage && opt.storage.includes(currentStorage));
+                    });
+                    if (selectedOption) {
+                      discountedPrice = selectedOption.discountedPrice;
+                      console.log('✅ URL\'den storage bulundu (ilk blok):', currentStorage, 'discounted price:', discountedPrice);
+                    }
+                  }
+                  
+                  // Eğer hala bulunamazsa ilk seçeneğin discounted price'ını kullan
+                  if (!discountedPrice && phone.storageOptions.length > 0) {
+                    discountedPrice = phone.storageOptions[0].discountedPrice;
+                    console.log('✅ İlk storage seçeneği kullanıldı (ilk blok), discounted price:', discountedPrice);
+                  }
                 }
+                
+                if (discountedPrice) {
+                  // Sadece tam sayı kısmını göster (ondalık kısmı kaldır)
+                  var priceText = Math.floor(discountedPrice).toString();
+                  priceElement.textContent = priceText;
+                  priceElement.innerText = priceText;
+                  console.log('✅ Discounted price güncellendi (ilk blok):', priceText, '(element:', priceElement, ')');
+                  return true;
+                } else {
+                  console.warn('⚠️ Discounted price bulunamadı (ilk blok), storageOptions:', phone.storageOptions);
+                }
+              } else {
+                console.warn('⚠️ phone.storageOptions yok veya boş (ilk blok):', phone);
               }
-              
-              // Eğer hala bulunamazsa ilk seçeneğin discounted price'ını kullan
-              if (!discountedPrice && phone.storageOptions.length > 0) {
-                discountedPrice = phone.storageOptions[0].discountedPrice;
-                console.log('✅ İlk storage seçeneği kullanıldı, discounted price:', discountedPrice);
-              }
-            }
-            
-            if (discountedPrice) {
-              // Sadece tam sayı kısmını göster (ondalık kısmı kaldır)
-              var priceText = Math.floor(discountedPrice).toString();
-              priceElement.textContent = priceText;
-              console.log('✅ Discounted price güncellendi:', priceText);
             } else {
-              console.warn('⚠️ Discounted price bulunamadı');
+              console.warn('⚠️ branded-price-whole-value elementi bulunamadı (ilk blok), tekrar deneniyor...');
+              return false;
             }
-          } else {
-            if (!priceElement) {
-              console.warn('⚠️ branded-price-whole-value elementi bulunamadı');
-            }
+          }
+          
+          // İlk deneme
+          if (!updatePriceFirst()) {
+            // Eğer bulunamazsa, biraz bekle ve tekrar dene
+            setTimeout(function() {
+              if (!updatePriceFirst()) {
+                setTimeout(function() {
+                  updatePriceFirst();
+                }, 500);
+              }
+            }, 300);
           }
         } else {
           // sc-be471825-5 gdyQYk class'ına sahip elementleri güncelle
@@ -1871,52 +1900,81 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           }
         }
         
-        // Discounted price - branded-price-whole-value elementini bul ve güncelle
-        var priceElement = document.querySelector('.branded-price-whole-value');
-        if (priceElement && phone.storageOptions) {
-          // Önce 256 GB'ı bul
-          var discountedPrice = null;
-          var storage256GB = phone.storageOptions.find(function(opt) {
-            return opt.storage === '256 GB' || opt.storage === '256GB' || opt.storage.includes('256');
-          });
+        // Discounted price - branded-price-whole-value elementini bul ve güncelle (retry ile)
+        function updatePrice() {
+          console.log('🔍 branded-price-whole-value elementi aranıyor...');
+          var priceElement = document.querySelector('.branded-price-whole-value') ||
+                             document.querySelector('[class*="branded-price-whole-value"]') ||
+                             document.querySelector('[class*="price-whole"]') ||
+                             document.querySelector('[data-test*="price"]');
           
-          if (storage256GB) {
-            discountedPrice = storage256GB.discountedPrice;
-            console.log('✅ 256 GB storage bulundu, discounted price:', discountedPrice);
-          } else {
-            // Eğer 256 GB bulunamazsa, URL'den storage parametresini al
-            var urlParams = new URLSearchParams(window.location.search);
-            var currentStorage = urlParams.get('storage') || '';
+          if (priceElement) {
+            console.log('✅ branded-price-whole-value elementi bulundu:', priceElement);
             
-            if (currentStorage) {
-              var selectedOption = phone.storageOptions.find(function(opt) {
-                return opt.storage === currentStorage || opt.storage.includes(currentStorage);
+            if (phone.storageOptions && phone.storageOptions.length > 0) {
+              console.log('📦 Storage options:', phone.storageOptions);
+              
+              // Önce 256 GB'ı bul
+              var discountedPrice = null;
+              var storage256GB = phone.storageOptions.find(function(opt) {
+                return opt.storage === '256 GB' || opt.storage === '256GB' || (opt.storage && opt.storage.includes('256'));
               });
-              if (selectedOption) {
-                discountedPrice = selectedOption.discountedPrice;
-                console.log('✅ URL\'den storage bulundu:', currentStorage, 'discounted price:', discountedPrice);
+              
+              if (storage256GB) {
+                discountedPrice = storage256GB.discountedPrice;
+                console.log('✅ 256 GB storage bulundu, discounted price:', discountedPrice);
+              } else {
+                console.log('⚠️ 256 GB bulunamadı, alternatif aranıyor...');
+                // Eğer 256 GB bulunamazsa, URL'den storage parametresini al
+                var urlParams = new URLSearchParams(window.location.search);
+                var currentStorage = urlParams.get('storage') || '';
+                
+                if (currentStorage) {
+                  var selectedOption = phone.storageOptions.find(function(opt) {
+                    return opt.storage === currentStorage || (opt.storage && opt.storage.includes(currentStorage));
+                  });
+                  if (selectedOption) {
+                    discountedPrice = selectedOption.discountedPrice;
+                    console.log('✅ URL\'den storage bulundu:', currentStorage, 'discounted price:', discountedPrice);
+                  }
+                }
+                
+                // Eğer hala bulunamazsa ilk seçeneğin discounted price'ını kullan
+                if (!discountedPrice && phone.storageOptions.length > 0) {
+                  discountedPrice = phone.storageOptions[0].discountedPrice;
+                  console.log('✅ İlk storage seçeneği kullanıldı, discounted price:', discountedPrice);
+                }
               }
+              
+              if (discountedPrice) {
+                // Sadece tam sayı kısmını göster (ondalık kısmı kaldır)
+                var priceText = Math.floor(discountedPrice).toString();
+                priceElement.textContent = priceText;
+                priceElement.innerText = priceText;
+                console.log('✅ Discounted price güncellendi:', priceText, '(element:', priceElement, ')');
+                return true;
+              } else {
+                console.warn('⚠️ Discounted price bulunamadı, storageOptions:', phone.storageOptions);
+              }
+            } else {
+              console.warn('⚠️ phone.storageOptions yok veya boş:', phone);
             }
-            
-            // Eğer hala bulunamazsa ilk seçeneğin discounted price'ını kullan
-            if (!discountedPrice && phone.storageOptions.length > 0) {
-              discountedPrice = phone.storageOptions[0].discountedPrice;
-              console.log('✅ İlk storage seçeneği kullanıldı, discounted price:', discountedPrice);
-            }
-          }
-          
-          if (discountedPrice) {
-            // Sadece tam sayı kısmını göster (ondalık kısmı kaldır)
-            var priceText = Math.floor(discountedPrice).toString();
-            priceElement.textContent = priceText;
-            console.log('✅ Discounted price güncellendi:', priceText);
           } else {
-            console.warn('⚠️ Discounted price bulunamadı');
+            console.warn('⚠️ branded-price-whole-value elementi bulunamadı, tekrar deneniyor...');
+            return false;
           }
-        } else {
-          if (!priceElement) {
-            console.warn('⚠️ branded-price-whole-value elementi bulunamadı');
-          }
+        }
+        
+        // İlk deneme
+        if (!updatePrice()) {
+          // Eğer bulunamazsa, biraz bekle ve tekrar dene
+          setTimeout(function() {
+            if (!updatePrice()) {
+              setTimeout(function() {
+                updatePrice();
+              }, 500);
+            }
+          }, 300);
         }
         
         // Description - pdp-description-pim-fallback elementinin içindeki article'ı bul ve güncelle
