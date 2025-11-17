@@ -1989,15 +1989,6 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             
             console.log('💾 Storage:', speicherkapazitat);
             
-            // Sayfanın EN ÜSTÜNE bilgileri yaz
-            var existingInfo = document.getElementById('product-info-top');
-            if (existingInfo) {
-              existingInfo.remove();
-            }
-            
-            var infoDiv = document.createElement('div');
-            infoDiv.id = 'product-info-top';
-            
             // Bilgileri topla
             var infoText = '';
             if (phone.displayDiagonale) {
@@ -2014,20 +2005,9 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               infoText += 'Beschreibung: ' + phone.description;
             }
             
-            infoDiv.textContent = infoText;
-            infoDiv.style.cssText = 'position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; z-index: 999999 !important; background: #ffffff !important; padding: 20px !important; white-space: pre-wrap !important; display: block !important; font-size: 16px !important; color: #000000 !important; border-bottom: 2px solid #e60012 !important;';
-            
-            // Body'nin EN BAŞINA ekle
-            if (document.body) {
-              document.body.insertBefore(infoDiv, document.body.firstChild);
-              console.log('✅ Bilgiler sayfanın en üstüne eklendi');
-            } else {
-              document.documentElement.appendChild(infoDiv);
-              console.log('✅ Bilgiler documentElement\'e eklendi');
-            }
-            
-            // Sayfayı en üste kaydır
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Tıklanan elementin içeriğini değiştir
+            clickedElement.textContent = infoText;
+            console.log('✅ Element içeriği güncellendi');
           })
           .catch(function(err) {
             console.error('❌ Hata:', err);
