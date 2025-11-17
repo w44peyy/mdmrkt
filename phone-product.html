@@ -1775,15 +1775,41 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           if (phone.colorOptions && phone.colorOptions.length > 0) {
             console.log('🎨 ColorOptions bulundu:', phone.colorOptions.length, 'renk', phone.colorOptions);
             
-            // sc-66506eb5-0 dzunfB elementini direkt bul
-            var targetElement = document.querySelector('.sc-66506eb5-0.dzunfB');
-            console.log('🎨 Target element bulundu:', targetElement);
+            // sc-66506eb5-0 dzunfB elementini bul - retry mekanizması ile
+            var targetElement = null;
+            var retryCount = 0;
+            var maxRetries = 5;
             
-            // Mevcut renk seçimi container'ını kontrol et
-            var existingColorContainer = document.querySelector('[data-test="mms-pdp-variants-color"]') ||
-                                         document.querySelector('.mms-pdp-variants-color');
+            function findAndAddColorOptions() {
+              targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
+                             document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
+                             document.querySelector('.dzunfB');
+              
+              console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
+              
+              if (!targetElement && retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(findAndAddColorOptions, 200);
+                return;
+              }
+              
+              if (!targetElement) {
+                console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
+                return;
+              }
+              
+              console.log('✅ Target element bulundu:', targetElement, 'Parent:', targetElement.parentElement);
             
-            if (!existingColorContainer && targetElement) {
+              // Mevcut renk seçimi container'ını kontrol et
+              var existingColorContainer = document.querySelector('[data-test="mms-pdp-variants-color"]') ||
+                                           document.querySelector('.mms-pdp-variants-color');
+              
+              if (existingColorContainer) {
+                console.log('✅ Renk seçimi container zaten mevcut (ilk blok)');
+                return;
+              }
+              
+              if (targetElement) {
               // Container yoksa oluştur
               var colorContainer = document.createElement('div');
               colorContainer.setAttribute('data-test', 'mms-pdp-variants-color');
@@ -1880,16 +1906,48 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
               
               colorContainer.appendChild(colorOptionsWrapper);
               
-              // sc-66506eb5-0 dzunfB elementinin altına ekle - afterend kullan
-              targetElement.insertAdjacentElement('afterend', colorContainer);
-              console.log('✅ Renk seçimi sistemi eklendi (ilk blok):', phone.colorOptions.length, 'renk', colorContainer);
-            } else {
-              if (existingColorContainer) {
-                console.log('✅ Renk seçimi container zaten mevcut (ilk blok)');
-              } else {
-                console.warn('⚠️ Target element bulunamadı (ilk blok):', targetElement);
+              // sc-66506eb5-0 dzunfB elementinin altına ekle - birden fazla yöntem dene
+              try {
+                if (targetElement && targetElement.parentElement) {
+                  // Yöntem 1: insertAdjacentElement
+                  targetElement.insertAdjacentElement('afterend', colorContainer);
+                  console.log('✅ Renk seçimi sistemi eklendi (afterend):', phone.colorOptions.length, 'renk');
+                } else if (targetElement && targetElement.nextSibling) {
+                  // Yöntem 2: insertBefore nextSibling
+                  targetElement.parentElement.insertBefore(colorContainer, targetElement.nextSibling);
+                  console.log('✅ Renk seçimi sistemi eklendi (insertBefore):', phone.colorOptions.length, 'renk');
+                } else if (targetElement) {
+                  // Yöntem 3: parentElement'e appendChild
+                  if (targetElement.parentElement) {
+                    targetElement.parentElement.appendChild(colorContainer);
+                    console.log('✅ Renk seçimi sistemi eklendi (appendChild):', phone.colorOptions.length, 'renk');
+                  } else {
+                    // Yöntem 4: body'ye ekle (son çare)
+                    document.body.appendChild(colorContainer);
+                    console.warn('⚠️ Parent bulunamadı, body\'ye eklendi');
+                  }
+                }
+                
+                // Eklenen elementi kontrol et
+                setTimeout(function() {
+                  var addedElement = document.querySelector('[data-test="mms-pdp-variants-color"]');
+                  if (addedElement) {
+                    console.log('✅ Renk container DOM\'da doğrulandı:', addedElement);
+                    console.log('✅ Container parent:', addedElement.parentElement);
+                    console.log('✅ Container next sibling:', addedElement.nextSibling);
+                    console.log('✅ Container previous sibling:', addedElement.previousSibling);
+                  } else {
+                    console.error('❌ Renk container DOM\'da bulunamadı!');
+                  }
+                }, 100);
+              } catch (error) {
+                console.error('❌ Renk container eklenirken hata:', error);
+              }
               }
             }
+            
+            // İlk denemeyi başlat
+            findAndAddColorOptions();
           } else {
             console.warn('⚠️ ColorOptions yok veya boş (ilk blok):', phone.colorOptions);
           }
@@ -2018,15 +2076,41 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
         if (phone.colorOptions && phone.colorOptions.length > 0) {
           console.log('🎨 ColorOptions bulundu:', phone.colorOptions.length, 'renk', phone.colorOptions);
           
-          // sc-66506eb5-0 dzunfB elementini direkt bul
-          var targetElement = document.querySelector('.sc-66506eb5-0.dzunfB');
-          console.log('🎨 Target element bulundu:', targetElement);
+          // sc-66506eb5-0 dzunfB elementini bul - retry mekanizması ile
+          var targetElement = null;
+          var retryCount = 0;
+          var maxRetries = 5;
           
-          // Mevcut renk seçimi container'ını kontrol et
-          var existingColorContainer = document.querySelector('[data-test="mms-pdp-variants-color"]') ||
-                                       document.querySelector('.mms-pdp-variants-color');
+          function findAndAddColorOptions() {
+            targetElement = document.querySelector('.sc-66506eb5-0.dzunfB') ||
+                           document.querySelector('[class*="sc-66506eb5-0"][class*="dzunfB"]') ||
+                           document.querySelector('.dzunfB');
+            
+            console.log('🎨 Target element aranıyor (deneme ' + (retryCount + 1) + '):', targetElement);
+            
+            if (!targetElement && retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(findAndAddColorOptions, 200);
+              return;
+            }
+            
+            if (!targetElement) {
+              console.error('❌ Target element bulunamadı, tüm denemeler tükendi');
+              return;
+            }
+            
+            console.log('✅ Target element bulundu:', targetElement, 'Parent:', targetElement.parentElement);
           
-          if (!existingColorContainer && targetElement) {
+            // Mevcut renk seçimi container'ını kontrol et
+            var existingColorContainer = document.querySelector('[data-test="mms-pdp-variants-color"]') ||
+                                         document.querySelector('.mms-pdp-variants-color');
+            
+            if (existingColorContainer) {
+              console.log('✅ Renk seçimi container zaten mevcut');
+              return;
+            }
+            
+            if (targetElement) {
             // Container yoksa oluştur
             var colorContainer = document.createElement('div');
             colorContainer.setAttribute('data-test', 'mms-pdp-variants-color');
@@ -2123,16 +2207,48 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             
             colorContainer.appendChild(colorOptionsWrapper);
             
-            // sc-66506eb5-0 dzunfB elementinin altına ekle - afterend kullan
-            targetElement.insertAdjacentElement('afterend', colorContainer);
-            console.log('✅ Renk seçimi sistemi eklendi:', phone.colorOptions.length, 'renk', colorContainer);
-          } else {
-            if (existingColorContainer) {
-              console.log('✅ Renk seçimi container zaten mevcut');
-            } else {
-              console.warn('⚠️ Target element bulunamadı:', targetElement);
+            // sc-66506eb5-0 dzunfB elementinin altına ekle - birden fazla yöntem dene
+            try {
+              if (targetElement && targetElement.parentElement) {
+                // Yöntem 1: insertAdjacentElement
+                targetElement.insertAdjacentElement('afterend', colorContainer);
+                console.log('✅ Renk seçimi sistemi eklendi (afterend):', phone.colorOptions.length, 'renk');
+              } else if (targetElement && targetElement.nextSibling) {
+                // Yöntem 2: insertBefore nextSibling
+                targetElement.parentElement.insertBefore(colorContainer, targetElement.nextSibling);
+                console.log('✅ Renk seçimi sistemi eklendi (insertBefore):', phone.colorOptions.length, 'renk');
+              } else if (targetElement) {
+                // Yöntem 3: parentElement'e appendChild
+                if (targetElement.parentElement) {
+                  targetElement.parentElement.appendChild(colorContainer);
+                  console.log('✅ Renk seçimi sistemi eklendi (appendChild):', phone.colorOptions.length, 'renk');
+                } else {
+                  // Yöntem 4: body'ye ekle (son çare)
+                  document.body.appendChild(colorContainer);
+                  console.warn('⚠️ Parent bulunamadı, body\'ye eklendi');
+                }
+              }
+              
+              // Eklenen elementi kontrol et
+              setTimeout(function() {
+                var addedElement = document.querySelector('[data-test="mms-pdp-variants-color"]');
+                if (addedElement) {
+                  console.log('✅ Renk container DOM\'da doğrulandı:', addedElement);
+                  console.log('✅ Container parent:', addedElement.parentElement);
+                  console.log('✅ Container next sibling:', addedElement.nextSibling);
+                  console.log('✅ Container previous sibling:', addedElement.previousSibling);
+                } else {
+                  console.error('❌ Renk container DOM\'da bulunamadı!');
+                }
+              }, 100);
+            } catch (error) {
+              console.error('❌ Renk container eklenirken hata:', error);
+            }
             }
           }
+          
+          // İlk denemeyi başlat
+          findAndAddColorOptions();
         } else {
           console.warn('⚠️ ColorOptions yok veya boş:', phone.colorOptions);
         }
