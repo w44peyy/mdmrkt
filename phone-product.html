@@ -1750,8 +1750,8 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             }
           });
           
-          // Description - sc-94eb08bc-0 dRmOMv elementinin içindeki div'i bul ve güncelle
-          var descriptionElement = document.querySelector('.sc-94eb08bc-0.dRmOMv');
+          // Description - sc-66506eb5-0 dzunfB elementinin içindeki div'i bul ve güncelle
+          var descriptionElement = document.querySelector('.sc-66506eb5-0.dzunfB');
           if (descriptionElement && phone.description) {
             // İçindeki div'i bul veya direkt içeriği güncelle
             var innerDiv = descriptionElement.querySelector('div');
@@ -1761,6 +1761,47 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
             } else {
               descriptionElement.textContent = phone.description;
               console.log('✅ Description güncellendi (direkt):', phone.description);
+            }
+          }
+          
+          // Ürün ismi - sc-94eb08bc-0 dPxwlD elementini bul ve güncelle
+          var productNameElement = document.querySelector('.sc-94eb08bc-0.dPxwlD');
+          if (productNameElement) {
+            var productName = phone.name || phone.baseName || '';
+            if (productName) {
+              productNameElement.textContent = productName;
+              console.log('✅ Ürün ismi güncellendi:', productName);
+            }
+          }
+          
+          // Discounted price - branded-price-whole-value elementini bul ve güncelle
+          var priceElement = document.querySelector('.branded-price-whole-value');
+          if (priceElement && phone.storageOptions) {
+            // URL'den storage parametresini al
+            var urlParams = new URLSearchParams(window.location.search);
+            var currentStorage = urlParams.get('storage') || '';
+            
+            // Mevcut storage'a göre discounted price'ı bul
+            var discountedPrice = null;
+            if (currentStorage) {
+              var selectedOption = phone.storageOptions.find(function(opt) {
+                return opt.storage === currentStorage;
+              });
+              if (selectedOption) {
+                discountedPrice = selectedOption.discountedPrice;
+              }
+            }
+            
+            // Eğer storage bulunamazsa ilk seçeneğin discounted price'ını kullan
+            if (!discountedPrice && phone.storageOptions.length > 0) {
+              discountedPrice = phone.storageOptions[0].discountedPrice;
+            }
+            
+            if (discountedPrice) {
+              // Sadece tam sayı kısmını göster (ondalık kısmı kaldır)
+              var priceText = Math.floor(discountedPrice).toString();
+              priceElement.textContent = priceText;
+              console.log('✅ Discounted price güncellendi:', priceText);
             }
           }
         } else {
@@ -1782,8 +1823,8 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           });
         }
         
-        // Description - sc-94eb08bc-0 dRmOMv elementinin içindeki div'i bul ve güncelle
-        var descriptionElement = document.querySelector('.sc-94eb08bc-0.dRmOMv');
+        // Description - sc-66506eb5-0 dzunfB elementinin içindeki div'i bul ve güncelle
+        var descriptionElement = document.querySelector('.sc-66506eb5-0.dzunfB');
         if (descriptionElement && phone.description) {
           // İçindeki div'i bul veya direkt içeriği güncelle
           var innerDiv = descriptionElement.querySelector('div');
@@ -1793,6 +1834,47 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
           } else {
             descriptionElement.textContent = phone.description;
             console.log('✅ Description güncellendi (direkt):', phone.description);
+          }
+        }
+        
+        // Ürün ismi - sc-94eb08bc-0 dPxwlD elementini bul ve güncelle
+        var productNameElement = document.querySelector('.sc-94eb08bc-0.dPxwlD');
+        if (productNameElement) {
+          var productName = phone.name || phone.baseName || '';
+          if (productName) {
+            productNameElement.textContent = productName;
+            console.log('✅ Ürün ismi güncellendi:', productName);
+          }
+        }
+        
+        // Discounted price - branded-price-whole-value elementini bul ve güncelle
+        var priceElement = document.querySelector('.branded-price-whole-value');
+        if (priceElement && phone.storageOptions) {
+          // URL'den storage parametresini al
+          var urlParams = new URLSearchParams(window.location.search);
+          var currentStorage = urlParams.get('storage') || '';
+          
+          // Mevcut storage'a göre discounted price'ı bul
+          var discountedPrice = null;
+          if (currentStorage) {
+            var selectedOption = phone.storageOptions.find(function(opt) {
+              return opt.storage === currentStorage;
+            });
+            if (selectedOption) {
+              discountedPrice = selectedOption.discountedPrice;
+            }
+          }
+          
+          // Eğer storage bulunamazsa ilk seçeneğin discounted price'ını kullan
+          if (!discountedPrice && phone.storageOptions.length > 0) {
+            discountedPrice = phone.storageOptions[0].discountedPrice;
+          }
+          
+          if (discountedPrice) {
+            // Sadece tam sayı kısmını göster (ondalık kısmı kaldır)
+            var priceText = Math.floor(discountedPrice).toString();
+            priceElement.textContent = priceText;
+            console.log('✅ Discounted price güncellendi:', priceText);
           }
         }
       }
