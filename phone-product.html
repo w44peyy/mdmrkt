@@ -1575,10 +1575,33 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       text-align: center;
     }
     
+    #mms-sticky-a2c-mobile .sc-a4db4a77-0.EEesG {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #mms-sticky-a2c-mobile .sc-a4db4a77-0.EEesG svg {
+      width: 24px;
+      height: 24px;
+      fill: #ffffff;
+    }
+    
+    #mms-sticky-a2c-mobile .sticky-tax-info {
+      font-size: 0.75rem;
+      color: #666;
+      margin: 4px 0 0 0;
+      text-align: center;
+      width: 100%;
+      font-family: NotoSansDisplay, Arial, sans-serif;
+    }
+    
     /* Body padding bottom for sticky footer */
     @media (max-width: 751px) {
       body {
-        padding-bottom: 70px;
+        padding-bottom: 80px;
       }
     }
   </style>
@@ -1644,6 +1667,23 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       addToCartButton.setAttribute('data-ignore-a11y', 'true');
       addToCartButton.setAttribute('aria-label', 'In den Warenkorb');
       
+      // SVG ikonu ekle
+      var svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgIcon.setAttribute('width', '32');
+      svgIcon.setAttribute('height', '32');
+      svgIcon.setAttribute('viewBox', '0 0 24 24');
+      var svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      svgPath.setAttribute('d', 'M20 20a2 2 0 1 1-2-2 2 2 0 0 1 2 2M8 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2M21.5 4h-1a.5.5 0 0 0-.5.5V5a2.86 2.86 0 0 1-.36 1.37l-2.36 4.13a1 1 0 0 1-.75.5H10.3a1 1 0 0 1-.86-.5L5.16 3a2 2 0 0 0-1.74-1H2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h.92l4.28 7.49a2.2 2.2 0 0 0 .27.35l-1.86 3.7a.77.77 0 0 0 0 .71l.22.38A.76.76 0 0 0 7 17h12.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H8.62l1-2.09a2.74 2.74 0 0 0 .64.09h6.23A2.94 2.94 0 0 0 19 11.49l2.35-4.13A4.76 4.76 0 0 0 22 5v-.5a.5.5 0 0 0-.5-.5M16 5.38v-.76a.5.5 0 0 0-.5-.5h-1.62V2.5a.5.5 0 0 0-.5-.5h-.76a.5.5 0 0 0-.5.5v1.62H10.5a.5.5 0 0 0-.5.5v.76a.5.5 0 0 0 .5.5h1.62V7.5a.5.5 0 0 0 .5.5h.76a.5.5 0 0 0 .5-.5V5.88h1.62a.5.5 0 0 0 .5-.5');
+      svgIcon.appendChild(svgPath);
+      
+      var iconWrapper = document.createElement('div');
+      iconWrapper.setAttribute('width', '24');
+      iconWrapper.setAttribute('height', '24');
+      iconWrapper.setAttribute('aria-hidden', 'true');
+      iconWrapper.className = 'sc-a4db4a77-0 EEesG';
+      iconWrapper.appendChild(svgIcon);
+      addToCartButton.appendChild(iconWrapper);
+      
       var buttonText = document.createElement('span');
       buttonText.className = 'sc-dcccc264-0 cRkYbI';
       buttonText.textContent = 'In den Warenkorb';
@@ -1653,14 +1693,31 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       buttonEmptySpan.className = 'sc-f5b2dacb-0 hBMxtr';
       addToCartButton.appendChild(buttonEmptySpan);
       
+      // "inkl. MwSt. versandkostenfrei" yazısı - butonun üstüne
+      var taxInfo = document.createElement('p');
+      taxInfo.className = 'sticky-tax-info';
+      taxInfo.setAttribute('data-test', 'additional-info-normal');
+      taxInfo.style.cssText = 'font-size: 0.75rem; color: #666; margin: 0 0 8px 0; text-align: center; width: 100%; font-family: NotoSansDisplay, Arial, sans-serif;';
+      taxInfo.textContent = 'inkl. MwSt. versandkostenfrei';
+      
+      addToCartContainer.appendChild(taxInfo);
       addToCartContainer.appendChild(addToCartButton);
       
       stickyFooter.appendChild(priceContainer);
       stickyFooter.appendChild(addToCartContainer);
       
       // Body'ye ekle
-      document.body.appendChild(stickyFooter);
-      console.log('✅ Sticky footer oluşturuldu');
+      if (document.body) {
+        document.body.appendChild(stickyFooter);
+        console.log('✅ Sticky footer oluşturuldu');
+      } else {
+        setTimeout(function() {
+          if (document.body) {
+            document.body.appendChild(stickyFooter);
+            console.log('✅ Sticky footer oluşturuldu (retry)');
+          }
+        }, 100);
+      }
     }
     
     // Sticky footer fiyatını güncelle (global function)
@@ -2288,6 +2345,41 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                   
                   console.log('✅ Discounted price güncellendi (ilk blok):', priceText, '(element:', priceElement, ')');
                   
+                  // Fiyatın altına "inkl. MwSt. versandkostenfrei" yazısını ve SVG'yi ekle
+                  var existingTaxInfo = document.getElementById('price-tax-info');
+                  if (existingTaxInfo) {
+                    existingTaxInfo.remove();
+                  }
+                  
+                  var taxInfoContainer = document.createElement('div');
+                  taxInfoContainer.id = 'price-tax-info';
+                  taxInfoContainer.style.cssText = 'display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 8px; width: 100%;';
+                  
+                  // SVG ikonu ekle
+                  var svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                  svgIcon.setAttribute('width', '16');
+                  svgIcon.setAttribute('height', '16');
+                  svgIcon.setAttribute('viewBox', '0 0 24 24');
+                  svgIcon.style.cssText = 'flex-shrink: 0;';
+                  var svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                  svgPath.setAttribute('d', 'M20 20a2 2 0 1 1-2-2 2 2 0 0 1 2 2M8 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2M21.5 4h-1a.5.5 0 0 0-.5.5V5a2.86 2.86 0 0 1-.36 1.37l-2.36 4.13a1 1 0 0 1-.75.5H10.3a1 1 0 0 1-.86-.5L5.16 3a2 2 0 0 0-1.74-1H2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h.92l4.28 7.49a2.2 2.2 0 0 0 .27.35l-1.86 3.7a.77.77 0 0 0 0 .71l.22.38A.76.76 0 0 0 7 17h12.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H8.62l1-2.09a2.74 2.74 0 0 0 .64.09h6.23A2.94 2.94 0 0 0 19 11.49l2.35-4.13A4.76 4.76 0 0 0 22 5v-.5a.5.5 0 0 0-.5-.5M16 5.38v-.76a.5.5 0 0 0-.5-.5h-1.62V2.5a.5.5 0 0 0-.5-.5h-.76a.5.5 0 0 0-.5.5v1.62H10.5a.5.5 0 0 0-.5.5v.76a.5.5 0 0 0 .5.5h1.62V7.5a.5.5 0 0 0 .5.5h.76a.5.5 0 0 0 .5-.5V5.88h1.62a.5.5 0 0 0 .5-.5');
+                  svgPath.setAttribute('fill', '#666666');
+                  svgIcon.appendChild(svgPath);
+                  
+                  var taxText = document.createElement('span');
+                  taxText.textContent = 'inkl. MwSt. versandkostenfrei';
+                  taxText.style.cssText = 'font-size: 0.75rem; color: #666; font-family: NotoSansDisplay, Arial, sans-serif;';
+                  
+                  taxInfoContainer.appendChild(svgIcon);
+                  taxInfoContainer.appendChild(taxText);
+                  
+                  // Fiyat elementinin parent'ına veya fiyat elementinin hemen sonrasına ekle
+                  if (parentElement) {
+                    parentElement.appendChild(taxInfoContainer);
+                  } else {
+                    priceElement.parentElement.appendChild(taxInfoContainer);
+                  }
+                  
                   // Sticky footer fiyatını güncelle
                   updateStickyFooterPrice(discountedPrice);
                   
@@ -2608,6 +2700,41 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                 }
                 
                 console.log('✅ Discounted price güncellendi:', priceText, '(element:', priceElement, ')');
+                
+                // Fiyatın altına "inkl. MwSt. versandkostenfrei" yazısını ve SVG'yi ekle
+                var existingTaxInfo = document.getElementById('price-tax-info');
+                if (existingTaxInfo) {
+                  existingTaxInfo.remove();
+                }
+                
+                var taxInfoContainer = document.createElement('div');
+                taxInfoContainer.id = 'price-tax-info';
+                taxInfoContainer.style.cssText = 'display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 8px; width: 100%;';
+                
+                // SVG ikonu ekle
+                var svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svgIcon.setAttribute('width', '16');
+                svgIcon.setAttribute('height', '16');
+                svgIcon.setAttribute('viewBox', '0 0 24 24');
+                svgIcon.style.cssText = 'flex-shrink: 0;';
+                var svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                svgPath.setAttribute('d', 'M20 20a2 2 0 1 1-2-2 2 2 0 0 1 2 2M8 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2M21.5 4h-1a.5.5 0 0 0-.5.5V5a2.86 2.86 0 0 1-.36 1.37l-2.36 4.13a1 1 0 0 1-.75.5H10.3a1 1 0 0 1-.86-.5L5.16 3a2 2 0 0 0-1.74-1H2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h.92l4.28 7.49a2.2 2.2 0 0 0 .27.35l-1.86 3.7a.77.77 0 0 0 0 .71l.22.38A.76.76 0 0 0 7 17h12.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H8.62l1-2.09a2.74 2.74 0 0 0 .64.09h6.23A2.94 2.94 0 0 0 19 11.49l2.35-4.13A4.76 4.76 0 0 0 22 5v-.5a.5.5 0 0 0-.5-.5M16 5.38v-.76a.5.5 0 0 0-.5-.5h-1.62V2.5a.5.5 0 0 0-.5-.5h-.76a.5.5 0 0 0-.5.5v1.62H10.5a.5.5 0 0 0-.5.5v.76a.5.5 0 0 0 .5.5h1.62V7.5a.5.5 0 0 0 .5.5h.76a.5.5 0 0 0 .5-.5V5.88h1.62a.5.5 0 0 0 .5-.5');
+                svgPath.setAttribute('fill', '#666666');
+                svgIcon.appendChild(svgPath);
+                
+                var taxText = document.createElement('span');
+                taxText.textContent = 'inkl. MwSt. versandkostenfrei';
+                taxText.style.cssText = 'font-size: 0.75rem; color: #666; font-family: NotoSansDisplay, Arial, sans-serif;';
+                
+                taxInfoContainer.appendChild(svgIcon);
+                taxInfoContainer.appendChild(taxText);
+                
+                // Fiyat elementinin parent'ına veya fiyat elementinin hemen sonrasına ekle
+                if (parentElement) {
+                  parentElement.appendChild(taxInfoContainer);
+                } else {
+                  priceElement.parentElement.appendChild(taxInfoContainer);
+                }
                 
                 // Sticky footer fiyatını güncelle
                 updateStickyFooterPrice(discountedPrice);
@@ -2958,6 +3085,41 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
                     }
                     
                     console.log('✅ Fiyat storage seçeneğine göre güncellendi:', storageText, priceText);
+                    
+                    // Fiyatın altına "inkl. MwSt. versandkostenfrei" yazısını ve SVG'yi ekle
+                    var existingTaxInfo = document.getElementById('price-tax-info');
+                    if (existingTaxInfo) {
+                      existingTaxInfo.remove();
+                    }
+                    
+                    var taxInfoContainer = document.createElement('div');
+                    taxInfoContainer.id = 'price-tax-info';
+                    taxInfoContainer.style.cssText = 'display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 8px; width: 100%;';
+                    
+                    // SVG ikonu ekle
+                    var svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svgIcon.setAttribute('width', '16');
+                    svgIcon.setAttribute('height', '16');
+                    svgIcon.setAttribute('viewBox', '0 0 24 24');
+                    svgIcon.style.cssText = 'flex-shrink: 0;';
+                    var svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    svgPath.setAttribute('d', 'M20 20a2 2 0 1 1-2-2 2 2 0 0 1 2 2M8 18a2 2 0 1 0 2 2 2 2 0 0 0-2-2M21.5 4h-1a.5.5 0 0 0-.5.5V5a2.86 2.86 0 0 1-.36 1.37l-2.36 4.13a1 1 0 0 1-.75.5H10.3a1 1 0 0 1-.86-.5L5.16 3a2 2 0 0 0-1.74-1H2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h.92l4.28 7.49a2.2 2.2 0 0 0 .27.35l-1.86 3.7a.77.77 0 0 0 0 .71l.22.38A.76.76 0 0 0 7 17h12.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H8.62l1-2.09a2.74 2.74 0 0 0 .64.09h6.23A2.94 2.94 0 0 0 19 11.49l2.35-4.13A4.76 4.76 0 0 0 22 5v-.5a.5.5 0 0 0-.5-.5M16 5.38v-.76a.5.5 0 0 0-.5-.5h-1.62V2.5a.5.5 0 0 0-.5-.5h-.76a.5.5 0 0 0-.5.5v1.62H10.5a.5.5 0 0 0-.5.5v.76a.5.5 0 0 0 .5.5h1.62V7.5a.5.5 0 0 0 .5.5h.76a.5.5 0 0 0 .5-.5V5.88h1.62a.5.5 0 0 0 .5-.5');
+                    svgPath.setAttribute('fill', '#666666');
+                    svgIcon.appendChild(svgPath);
+                    
+                    var taxText = document.createElement('span');
+                    taxText.textContent = 'inkl. MwSt. versandkostenfrei';
+                    taxText.style.cssText = 'font-size: 0.75rem; color: #666; font-family: NotoSansDisplay, Arial, sans-serif;';
+                    
+                    taxInfoContainer.appendChild(svgIcon);
+                    taxInfoContainer.appendChild(taxText);
+                    
+                    // Fiyat elementinin parent'ına veya fiyat elementinin hemen sonrasına ekle
+                    if (parentElement) {
+                      parentElement.appendChild(taxInfoContainer);
+                    } else {
+                      priceElement.parentElement.appendChild(taxInfoContainer);
+                    }
                     
                     // Sticky footer fiyatını güncelle
                     updateStickyFooterPrice(selectedOption.discountedPrice);
