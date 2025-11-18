@@ -162,6 +162,151 @@
                 width: 100%;
             }
         }
+        
+        /* Checkout Form Modal */
+        #checkout-form-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        #checkout-form-modal.show {
+            display: flex;
+        }
+        
+        .checkout-form-container {
+            background: #fff;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .checkout-form-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .checkout-form-close:hover {
+            color: #000;
+        }
+        
+        .checkout-form-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        .checkout-form-step {
+            display: none;
+        }
+        
+        .checkout-form-step.active {
+            display: block;
+        }
+        
+        .checkout-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .checkout-form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #000;
+            font-size: 0.9rem;
+        }
+        
+        .checkout-form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e3e3e3;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .checkout-form-input:focus {
+            outline: none;
+            border-color: #DF0000;
+        }
+        
+        .checkout-form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+        
+        .checkout-form-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .checkout-form-button-primary {
+            background: #DF0000;
+            color: #fff;
+        }
+        
+        .checkout-form-button-primary:hover {
+            background: #b80000;
+        }
+        
+        .checkout-form-button-secondary {
+            background: #f5f5f5;
+            color: #000;
+        }
+        
+        .checkout-form-button-secondary:hover {
+            background: #e3e3e3;
+        }
+        
+        .checkout-form-step-indicator {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        
+        .checkout-form-step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e3e3e3;
+            transition: background 0.2s;
+        }
+        
+        .checkout-form-step-dot.active {
+            background: #DF0000;
+        }
     </style>
 </head>
 <body>
@@ -194,6 +339,71 @@
                     <span id="checkout-total-price">0,00 €</span>
                 </div>
                 <button id="checkout-complete-button" class="checkout-button">Bestellung abschließen</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Checkout Form Modal -->
+    <div id="checkout-form-modal">
+        <div class="checkout-form-container">
+            <button class="checkout-form-close" onclick="closeCheckoutForm()">&times;</button>
+            <h2 class="checkout-form-title">Bestelldaten</h2>
+            
+            <div class="checkout-form-step-indicator">
+                <div class="checkout-form-step-dot active" id="step-indicator-1"></div>
+                <div class="checkout-form-step-dot" id="step-indicator-2"></div>
+            </div>
+            
+            <!-- Step 1: E-posta, Ad, Soyad -->
+            <div class="checkout-form-step active" id="checkout-step-1">
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-email">E-Mail-Adresse *</label>
+                    <input type="email" id="checkout-email" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-firstname">Vorname *</label>
+                    <input type="text" id="checkout-firstname" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-lastname">Nachname *</label>
+                    <input type="text" id="checkout-lastname" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-buttons">
+                    <button type="button" class="checkout-form-button checkout-form-button-secondary" onclick="closeCheckoutForm()">Abbrechen</button>
+                    <button type="button" class="checkout-form-button checkout-form-button-primary" onclick="nextStep()">Weiter</button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Telefon, Adres -->
+            <div class="checkout-form-step" id="checkout-step-2">
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-phone">Telefonnummer *</label>
+                    <input type="tel" id="checkout-phone" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-street">Straße *</label>
+                    <input type="text" id="checkout-street" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-housenumber">Hausnummer *</label>
+                    <input type="text" id="checkout-housenumber" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-postal">Postleitzahl *</label>
+                    <input type="text" id="checkout-postal" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-city">Stadt *</label>
+                    <input type="text" id="checkout-city" class="checkout-form-input" required>
+                </div>
+                <div class="checkout-form-group">
+                    <label class="checkout-form-label" for="checkout-country">Land *</label>
+                    <input type="text" id="checkout-country" class="checkout-form-input" value="Deutschland" required>
+                </div>
+                <div class="checkout-form-buttons">
+                    <button type="button" class="checkout-form-button checkout-form-button-secondary" onclick="prevStep()">Zurück</button>
+                    <button type="button" class="checkout-form-button checkout-form-button-primary" onclick="goToPayment()">Zum Zahlungsschritt</button>
+                </div>
             </div>
         </div>
     </div>
@@ -319,9 +529,100 @@
                 });
         }
         
+        // Checkout form functions
+        var currentStep = 1;
+        
+        function showCheckoutForm() {
+            document.getElementById('checkout-form-modal').classList.add('show');
+            currentStep = 1;
+            updateStepIndicator();
+        }
+        
+        function closeCheckoutForm() {
+            document.getElementById('checkout-form-modal').classList.remove('show');
+            currentStep = 1;
+            updateStepIndicator();
+        }
+        
+        function nextStep() {
+            // Validate step 1
+            var email = document.getElementById('checkout-email').value;
+            var firstname = document.getElementById('checkout-firstname').value;
+            var lastname = document.getElementById('checkout-lastname').value;
+            
+            if (!email || !firstname || !lastname) {
+                alert('Bitte füllen Sie alle Pflichtfelder aus.');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                alert('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+                return;
+            }
+            
+            // Go to step 2
+            document.getElementById('checkout-step-1').classList.remove('active');
+            document.getElementById('checkout-step-2').classList.add('active');
+            currentStep = 2;
+            updateStepIndicator();
+        }
+        
+        function prevStep() {
+            document.getElementById('checkout-step-2').classList.remove('active');
+            document.getElementById('checkout-step-1').classList.add('active');
+            currentStep = 1;
+            updateStepIndicator();
+        }
+        
+        function updateStepIndicator() {
+            document.getElementById('step-indicator-1').classList.toggle('active', currentStep === 1);
+            document.getElementById('step-indicator-2').classList.toggle('active', currentStep === 2);
+        }
+        
+        function goToPayment() {
+            // Validate step 2
+            var phone = document.getElementById('checkout-phone').value;
+            var street = document.getElementById('checkout-street').value;
+            var housenumber = document.getElementById('checkout-housenumber').value;
+            var postal = document.getElementById('checkout-postal').value;
+            var city = document.getElementById('checkout-city').value;
+            var country = document.getElementById('checkout-country').value;
+            
+            if (!phone || !street || !housenumber || !postal || !city || !country) {
+                alert('Bitte füllen Sie alle Pflichtfelder aus.');
+                return;
+            }
+            
+            // Collect all form data
+            var formData = {
+                email: document.getElementById('checkout-email').value,
+                firstname: document.getElementById('checkout-firstname').value,
+                lastname: document.getElementById('checkout-lastname').value,
+                phone: phone,
+                street: street,
+                housenumber: housenumber,
+                postal: postal,
+                city: city,
+                country: country
+            };
+            
+            // Save to sessionStorage
+            sessionStorage.setItem('checkoutData', JSON.stringify(formData));
+            
+            // Redirect to payment page
+            window.location.href = '/checkout-payment.html';
+        }
+        
         // Complete purchase button
         document.getElementById('checkout-complete-button').addEventListener('click', function() {
-            alert('Bestellung abgeschlossen! (Diese Funktion ist noch nicht implementiert)');
+            showCheckoutForm();
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('checkout-form-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCheckoutForm();
+            }
         });
     </script>
 </body>
