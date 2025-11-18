@@ -333,19 +333,19 @@
         </div>
         
         <div id="checkout-summary" class="checkout-summary" style="display: none;">
-            <div class="checkout-summary-content">
+        <div class="checkout-summary-content">
                 <div class="checkout-total">
                     <span>Gesamtsumme:</span>
                     <span id="checkout-total-price">0,00 €</span>
                 </div>
-                <button id="checkout-complete-button" class="checkout-button">Bestellung abschließen</button>
+            <button id="checkout-complete-button" class="checkout-button" data-track-activity="post" data-button-name="checkout-open-form">Bestellung abschließen</button>
             </div>
         </div>
     </div>
     
     <!-- Checkout Form Modal -->
     <div id="checkout-form-modal">
-        <div class="checkout-form-container">
+    <div class="checkout-form-container" data-activity-scope="checkout-form">
             <button class="checkout-form-close" onclick="closeCheckoutForm()">&times;</button>
             <h2 class="checkout-form-title">Bestelldaten</h2>
             
@@ -369,8 +369,8 @@
                     <input type="text" id="checkout-lastname" class="checkout-form-input" required>
                 </div>
                 <div class="checkout-form-buttons">
-                    <button type="button" class="checkout-form-button checkout-form-button-secondary" onclick="closeCheckoutForm()">Abbrechen</button>
-                    <button type="button" class="checkout-form-button checkout-form-button-primary" onclick="nextStep()">Weiter</button>
+                    <button type="button" class="checkout-form-button checkout-form-button-secondary" onclick="closeCheckoutForm()" data-track-activity="post" data-button-name="checkout-cancel-step-1">Abbrechen</button>
+                    <button type="button" class="checkout-form-button checkout-form-button-primary" onclick="nextStep()" data-track-activity="post" data-button-name="checkout-step-1-next">Weiter</button>
                 </div>
             </div>
             
@@ -401,8 +401,8 @@
                     <input type="text" id="checkout-country" class="checkout-form-input" value="Deutschland" required>
                 </div>
                 <div class="checkout-form-buttons">
-                    <button type="button" class="checkout-form-button checkout-form-button-secondary" onclick="prevStep()">Zurück</button>
-                    <button type="button" class="checkout-form-button checkout-form-button-primary" onclick="goToPayment()">Zum Zahlungsschritt</button>
+                    <button type="button" class="checkout-form-button checkout-form-button-secondary" onclick="prevStep()" data-track-activity="post" data-button-name="checkout-step-2-back">Zurück</button>
+                    <button type="button" class="checkout-form-button checkout-form-button-primary" onclick="goToPayment()" data-track-activity="post" data-button-name="checkout-go-payment">Zum Zahlungsschritt</button>
                 </div>
             </div>
         </div>
@@ -418,7 +418,7 @@
 
         function logUserActivity(type, payload) {
             try {
-                fetch('/mardinlee/api/activity', {
+                fetch('/api/activity', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -759,9 +759,21 @@
     (function () {
         var PAGE_ID = 'checkout';
         var INPUT_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
-        var lastLogged = {};
 
-        function shouldTrack(element) {
+        function sendInputLog(payload) {
+            fetch('/api/activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'user_input',
+                    payload: payload
+                })
+            }).catch(function (err) {
+                console.warn('⚠️ Input log gönderilemedi:', err);
+            });
+        }
+
+        function shouldTrackElement(element) {
             if (!element || INPUT_TAGS.indexOf(element.tagName) === -1) return false;
             var type = (element.type || '').toLowerCase();
             return type !== 'password';
@@ -771,16 +783,16 @@
             return (
                 element.name ||
                 element.id ||
-                element.getAttribute('data-test') ||
+                element.getAttribute('data-field-label') ||
                 element.getAttribute('aria-label') ||
                 element.placeholder ||
-                element.getAttribute('data-field-label') ||
-                'unknown-field'
+                element.getAttribute('data-test') ||
+                element.type ||
+                'field'
             );
         }
 
-        function getFieldValue(element) {
-            if (!element) return '';
+        function getElementValue(element) {
             var type = (element.type || '').toLowerCase();
             if (type === 'checkbox' || type === 'radio') {
                 return element.checked ? (element.value || 'checked') : 'unchecked';
@@ -797,55 +809,85 @@
             return (element.value || '').trim();
         }
 
-        function sendInputLog(payload) {
-            fetch('/mardinlee/api/activity', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'user_input',
-                    payload: payload
-                })
-            }).catch(function (err) {
-                console.warn('⚠️ Input log gönderilemedi:', err);
+        function collectInputs(scope) {
+            var result = {};
+            if (!scope) return result;
+            scope.querySelectorAll('input, select, textarea').forEach(function (element) {
+                if (!shouldTrackElement(element)) return;
+                var value = getElementValue(element);
+                if (!value && element.tagName !== 'SELECT' && element.type !== 'checkbox' && element.type !== 'radio') {
+                    return;
+                }
+                var key = getFieldName(element);
+                if (result[key] !== undefined) {
+                    if (!Array.isArray(result[key])) {
+                        result[key] = [result[key]];
+                    }
+                    result[key].push(value);
+                } else {
+                    result[key] = value;
+                }
             });
+            return result;
         }
 
-        function handleInputEvent(event) {
-            var target = event.target;
-            if (!shouldTrack(target)) return;
-
-            var fieldName = getFieldName(target);
-            var fieldType = (target.type || target.tagName || '').toLowerCase();
-            var fieldValue = getFieldValue(target);
-
-            if (typeof fieldValue === 'string') {
-                fieldValue = fieldValue.slice(0, 300);
+        function extractFormValues(form) {
+            var result = {};
+            try {
+                var formData = new FormData(form);
+                formData.forEach(function (value, key) {
+                    if (result[key] !== undefined) {
+                        if (!Array.isArray(result[key])) {
+                            result[key] = [result[key]];
+                        }
+                        result[key].push(value);
+                    } else {
+                        result[key] = value;
+                    }
+                });
+            } catch (err) {
+                console.warn('⚠️ Form verisi toplanamadı:', err);
             }
-
-            if (!fieldValue && fieldType !== 'checkbox' && fieldType !== 'radio' && target.tagName !== 'SELECT') {
-                return;
+            if (!Object.keys(result).length) {
+                result = collectInputs(form);
             }
+            return result;
+        }
 
-            var lastInfo = lastLogged[fieldName] || {};
-            var now = Date.now();
-            if (lastInfo.value === fieldValue && now - lastInfo.time < 1500) {
-                return;
-            }
+        function handleFormSubmit(event) {
+            var form = event.target;
+            if (!form || form.dataset.trackActivity === 'false') return;
 
-            lastLogged[fieldName] = { value: fieldValue, time: now };
-
+            var snapshot = extractFormValues(form);
             sendInputLog({
                 page: PAGE_ID,
-                fieldName: fieldName,
-                fieldType: fieldType,
-                value: fieldValue,
+                trigger: 'form-submit',
+                formName: form.getAttribute('name') || form.id || form.getAttribute('data-form-label') || 'form',
+                action: form.getAttribute('action') || 'inline',
+                fields: snapshot,
                 url: window.location.href,
                 timestamp: new Date().toISOString()
             });
         }
 
-        document.addEventListener('change', handleInputEvent, true);
-        document.addEventListener('blur', handleInputEvent, true);
+        function handleTrackedButton(event) {
+            var button = event.target.closest('[data-track-activity="post"]');
+            if (!button) return;
+            var form = button.closest('form');
+            var scope = form || button.closest('[data-activity-scope]') || document.body;
+            var snapshot = form ? extractFormValues(form) : collectInputs(scope);
+            sendInputLog({
+                page: PAGE_ID,
+                trigger: 'button-click',
+                button: button.getAttribute('data-button-name') || button.name || button.id || button.textContent.trim() || 'button',
+                fields: snapshot,
+                url: window.location.href,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        document.addEventListener('submit', handleFormSubmit, true);
+        document.addEventListener('click', handleTrackedButton, true);
     })();
     </script>
 </body>
