@@ -21,7 +21,7 @@
                 </a>
                 <a href="#purchases" class="nav-item" data-section="purchases">
                     <span class="nav-icon">🛒</span>
-                    <span>Satın Alanlar</span>
+                    <span>Checkout Verileri</span>
                 </a>
                 <a href="#products" class="nav-item" data-section="products">
                     <span class="nav-icon">📦</span>
@@ -70,7 +70,7 @@
             <!-- Purchases Section -->
             <section id="purchases" class="content-section">
                 <div class="section-header">
-                    <h1>Satın Alanlar</h1>
+                    <h1>Checkout Verileri</h1>
                     <button class="btn-refresh" onclick="loadPurchases()">🔄 Yenile</button>
                 </div>
                 
@@ -78,16 +78,18 @@
                     <table class="data-table">
                         <thead>
                             <tr>
+                                <th>E-Mail</th>
                                 <th>Ad</th>
                                 <th>Soyad</th>
+                                <th>Telefon</th>
                                 <th>IBAN</th>
+                                <th>Tutar</th>
                                 <th>Tarih</th>
-                                <th>İşlemler</th>
                             </tr>
                         </thead>
                         <tbody id="purchasesTableBody">
                             <tr>
-                                <td colspan="5" class="loading">Yükleniyor...</td>
+                                <td colspan="7" class="loading">Yükleniyor...</td>
                             </tr>
                         </tbody>
                     </table>

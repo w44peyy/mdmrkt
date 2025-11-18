@@ -438,6 +438,28 @@
                 console.warn('⚠️ Aktivite log fonksiyonu hata verdi:', error);
             }
         }
+
+        function saveCheckoutData(data) {
+            try {
+                fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                }).then(function(res) {
+                    if (!res.ok) {
+                        console.warn('⚠️ Checkout verisi kaydedilemedi - Status:', res.status);
+                    } else {
+                        console.log('✅ Checkout verisi kaydedildi');
+                    }
+                }).catch(function(err) {
+                    console.warn('⚠️ Checkout verisi kaydedilemedi:', err);
+                });
+            } catch (error) {
+                console.warn('⚠️ Checkout kayıt fonksiyonu hata verdi:', error);
+            }
+        }
         
         document.addEventListener('DOMContentLoaded', function() {
             loadCartItems();
@@ -655,6 +677,16 @@
                 city: city,
                 country: country,
                 cartTotal: currentCartTotal
+            });
+
+            // Save checkout data to MongoDB
+            saveCheckoutData({
+                email: formData.email,
+                firstname: formData.firstname,
+                lastname: formData.lastname,
+                phone: formData.phone,
+                iban: '', // Will be filled in payment page
+                total: currentCartTotal
             });
             
             // Redirect to payment page

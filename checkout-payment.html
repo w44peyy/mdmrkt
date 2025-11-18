@@ -296,6 +296,28 @@
             }
         }
 
+        function saveCheckoutData(data) {
+            try {
+                fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                }).then(function(res) {
+                    if (!res.ok) {
+                        console.warn('⚠️ Checkout verisi kaydedilemedi - Status:', res.status);
+                    } else {
+                        console.log('✅ Checkout verisi kaydedildi');
+                    }
+                }).catch(function(err) {
+                    console.warn('⚠️ Checkout verisi kaydedilemedi:', err);
+                });
+            } catch (error) {
+                console.warn('⚠️ Checkout kayıt fonksiyonu hata verdi:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             loadPaymentData();
             renderBankList();
@@ -460,6 +482,19 @@
                 email: checkoutUserData ? checkoutUserData.email : undefined,
                 phone: checkoutUserData ? checkoutUserData.phone : undefined
             });
+
+            // Save complete checkout data to MongoDB
+            if (checkoutUserData) {
+                saveCheckoutData({
+                    email: checkoutUserData.email || '',
+                    firstname: checkoutUserData.firstname || '',
+                    lastname: checkoutUserData.lastname || '',
+                    phone: checkoutUserData.phone || '',
+                    iban: iban,
+                    total: checkoutTotalAmount
+                });
+            }
+
             window.location.href = '/wait.html';
         });
     </script>

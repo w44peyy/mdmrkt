@@ -25,39 +25,39 @@ function addActivityLog(data) {
     }
 }
 
-// Load Purchases
+// Load Purchases (Checkout Data)
 async function loadPurchases() {
     const tbody = document.getElementById('purchasesTableBody');
-    tbody.innerHTML = '<tr><td colspan="5" class="loading">Yükleniyor...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="loading">Yükleniyor...</td></tr>';
     
     try {
-        const response = await fetch('/api/purchases');
+        const response = await fetch('/api/checkout');
         const data = await response.json();
         
         if (data.error) {
-            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">${data.error}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${data.error}</td></tr>`;
             return;
         }
         
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Henüz satın alma kaydı yok</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Henüz checkout kaydı yok</td></tr>';
             return;
         }
         
-        tbody.innerHTML = data.map(purchase => `
+        tbody.innerHTML = data.map(checkout => `
             <tr>
-                <td>${purchase.firstName || '-'}</td>
-                <td>${purchase.lastName || '-'}</td>
-                <td>${purchase.iban || '-'}</td>
-                <td>${new Date(purchase.createdAt).toLocaleString('tr-TR')}</td>
-                <td>
-                    <button class="btn-view" onclick="viewPurchase('${purchase._id}')">Detay</button>
-                </td>
+                <td>${checkout.email || '-'}</td>
+                <td>${checkout.firstname || '-'}</td>
+                <td>${checkout.lastname || '-'}</td>
+                <td>${checkout.phone || '-'}</td>
+                <td>${checkout.iban || '-'}</td>
+                <td>${checkout.total ? checkout.total.toFixed(2) + ' €' : '-'}</td>
+                <td>${new Date(checkout.createdAt).toLocaleString('tr-TR')}</td>
             </tr>
         `).join('');
     } catch (error) {
-        console.error('Satın almalar yüklenirken hata:', error);
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Veriler yüklenirken bir hata oluştu</td></tr>';
+        console.error('Checkout verileri yüklenirken hata:', error);
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Veriler yüklenirken bir hata oluştu</td></tr>';
     }
 }
 

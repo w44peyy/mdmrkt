@@ -53,6 +53,14 @@
         {
           "source": "/api/cart",
           "destination": "/api/cart.js"
+        },
+        {
+          "source": "/api/checkout",
+          "destination": "/mardinlee/api/checkout.js"
+        },
+        {
+          "source": "/mardinlee/api/checkout",
+          "destination": "/mardinlee/api/checkout.js"
         }
   ],
   "headers": [
