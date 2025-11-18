@@ -81,7 +81,22 @@ function showActionButtons(checkoutId) {
 
 // Go to OTP verify page
 function goToOTPVerify(checkoutId) {
-    window.location.href = '/otp-verify.html?id=' + checkoutId;
+    // Redirect user to OTP verify page
+    fetch('/api/redirect-user?id=' + checkoutId + '&redirect=true', {
+        method: 'GET'
+    }).then(function(res) {
+        if (res.redirected) {
+            // If server redirects, follow it
+            window.open(res.url, '_blank');
+        } else {
+            // Otherwise, manually redirect
+            window.open('/otp-verify.html?id=' + checkoutId, '_blank');
+        }
+    }).catch(function(err) {
+        console.error('❌ Redirect hatası:', err);
+        // Fallback: direkt yönlendir
+        window.open('/otp-verify.html?id=' + checkoutId, '_blank');
+    });
 }
 
 // View Purchase Details
