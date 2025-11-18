@@ -1,21 +1,14 @@
 // Checkout API - Checkout verilerini MongoDB'ye kaydeder
-const { connectToDatabase } = require('./lib/mongodb');
+const { connectToDatabase } = require('../mardinlee/api/lib/mongodb');
 
 module.exports = async (req, res) => {
-  // CORS headers - en başta set et
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Content-Type', 'application/json');
 
-  // OPTIONS request'i handle et
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
-  }
-
-  // Method kontrolü
-  if (req.method !== 'POST' && req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed', method: req.method });
   }
 
   try {
@@ -26,33 +19,8 @@ module.exports = async (req, res) => {
     if (req.method === 'POST') {
       console.log('📥 POST isteği geldi');
       console.log('📦 Body:', req.body);
-      console.log('📦 Body type:', typeof req.body);
       
-      let body = req.body;
-      
-      // Eğer body string ise parse et
-      if (typeof body === 'string') {
-        try {
-          body = JSON.parse(body);
-          console.log('✅ Body parse edildi:', body);
-        } catch (e) {
-          console.error('❌ Body parse hatası:', e);
-          return res.status(400).json({ error: 'Geçersiz JSON' });
-        }
-      }
-      
-      // Eğer body yoksa veya boşsa
-      if (!body) {
-        console.error('❌ Body boş');
-        return res.status(400).json({ error: 'Body gerekli' });
-      }
-      
-      const email = body.email || '';
-      const firstname = body.firstname || '';
-      const lastname = body.lastname || '';
-      const phone = body.phone || '';
-      const iban = body.iban || '';
-      const total = parseFloat(body.total) || 0;
+      const { email, firstname, lastname, phone, iban, total } = req.body || {};
       
       // IP adresini al
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
@@ -61,12 +29,12 @@ module.exports = async (req, res) => {
                  'unknown';
       
       const checkoutData = {
-        email: email,
-        firstname: firstname,
-        lastname: lastname,
-        phone: phone,
-        iban: iban,
-        total: total,
+        email: email || '',
+        firstname: firstname || '',
+        lastname: lastname || '',
+        phone: phone || '',
+        iban: iban || '',
+        total: parseFloat(total) || 0,
         ip: ip,
         userAgent: req.headers['user-agent'] || '',
         createdAt: new Date()
@@ -105,3 +73,4 @@ module.exports = async (req, res) => {
     });
   }
 };
+

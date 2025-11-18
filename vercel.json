@@ -56,11 +56,11 @@
         },
         {
           "source": "/api/checkout",
-          "destination": "/mardinlee/api/checkout.js"
+          "destination": "/api/checkout.js"
         },
         {
           "source": "/mardinlee/api/checkout",
-          "destination": "/mardinlee/api/checkout.js"
+          "destination": "/api/checkout.js"
         }
   ],
   "headers": [
