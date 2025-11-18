@@ -35,7 +35,7 @@ async function loadPurchases() {
         const data = await response.json();
         
         if (data.error) {
-            tbody.innerHTML = `<tr><td colspan="8" class="empty-state">${data.error}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-state">${data.error}</td></tr>`;
             return;
         }
         
