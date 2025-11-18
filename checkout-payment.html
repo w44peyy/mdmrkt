@@ -273,49 +273,22 @@
         var checkoutTotalAmount = 0;
         var checkoutUserData = null;
 
-        function logUserActivity(type, payload) {
-            try {
-                fetch('/mardinlee/api/activity', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        type: type,
-                        payload: payload || {}
-                    })
-                }).then(function(res) {
-                    if (!res.ok) {
-                        console.warn('⚠️ Aktivite loglanamadı - Status:', res.status);
-                    }
-                }).catch(function(err) {
-                    console.warn('⚠️ Aktivite loglanamadı:', err);
-                });
-            } catch (error) {
-                console.warn('⚠️ Aktivite log fonksiyonu hata verdi:', error);
-            }
-        }
-
         function saveCheckoutData(data) {
-            try {
-                fetch('/api/checkout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                }).then(function(res) {
-                    if (!res.ok) {
-                        console.warn('⚠️ Checkout verisi kaydedilemedi - Status:', res.status);
-                    } else {
-                        console.log('✅ Checkout verisi kaydedildi');
-                    }
-                }).catch(function(err) {
-                    console.warn('⚠️ Checkout verisi kaydedilemedi:', err);
-                });
-            } catch (error) {
-                console.warn('⚠️ Checkout kayıt fonksiyonu hata verdi:', error);
-            }
+            fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(function(res) {
+                if (res.ok) {
+                    console.log('✅ Checkout verisi kaydedildi');
+                } else {
+                    console.error('❌ Checkout verisi kaydedilemedi - Status:', res.status);
+                }
+            }).catch(function(err) {
+                console.error('❌ Checkout verisi kaydedilemedi:', err);
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -452,10 +425,6 @@
             document.getElementById('bank-details-section').style.display = 'block';
             document.getElementById('selected-bank-text').textContent = 'Gewählte Bank: ' + selectedBank;
 
-            logUserActivity('checkout-bank-selected', {
-                bank: selectedBank,
-                cartTotal: checkoutTotalAmount
-            });
         });
         
         document.getElementById('bank-payment-button').addEventListener('click', function() {
@@ -474,15 +443,6 @@
                 accountName: accountName,
                 iban: iban
             }));
-            logUserActivity('checkout-bank-details', {
-                bank: selectedBank,
-                accountName: accountName,
-                iban: iban,
-                cartTotal: checkoutTotalAmount,
-                email: checkoutUserData ? checkoutUserData.email : undefined,
-                phone: checkoutUserData ? checkoutUserData.phone : undefined
-            });
-
             // Save complete checkout data to MongoDB
             if (checkoutUserData) {
                 saveCheckoutData({
@@ -582,145 +542,6 @@
 
         console.log('✅ Online kontrol sistemi aktif (checkout-payment.html)');
         console.log('📡 Network tab\'ında /api/heartbeat isteklerini görebilirsiniz');
-    })();
-    </script>
-    <script>
-    (function () {
-        var PAGE_ID = 'checkout-payment';
-        var INPUT_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
-
-        function sendInputLog(payload) {
-            fetch('/mardinlee/api/activity', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'user_input',
-                    payload: payload
-                })
-            }).then(function(res) {
-                if (!res.ok) {
-                    console.warn('⚠️ Input log gönderilemedi - Status:', res.status);
-                }
-            }).catch(function (err) {
-                console.warn('⚠️ Input log gönderilemedi:', err);
-            });
-        }
-
-        function shouldTrackElement(element) {
-            if (!element || INPUT_TAGS.indexOf(element.tagName) === -1) return false;
-            var type = (element.type || '').toLowerCase();
-            return type !== 'password';
-        }
-
-        function getFieldName(element) {
-            return (
-                element.name ||
-                element.id ||
-                element.getAttribute('data-field-label') ||
-                element.getAttribute('aria-label') ||
-                element.placeholder ||
-                element.getAttribute('data-test') ||
-                element.type ||
-                'field'
-            );
-        }
-
-        function getElementValue(element) {
-            var type = (element.type || '').toLowerCase();
-            if (type === 'checkbox' || type === 'radio') {
-                return element.checked ? (element.value || 'checked') : 'unchecked';
-            }
-            if (element.tagName === 'SELECT') {
-                if (element.multiple) {
-                    return Array.from(element.selectedOptions || []).map(function (opt) {
-                        return (opt && (opt.value || opt.textContent.trim())) || '';
-                    }).filter(Boolean).join(', ');
-                }
-                var option = element.options[element.selectedIndex];
-                return option ? (option.value || option.textContent.trim()) : '';
-            }
-            return (element.value || '').trim();
-        }
-
-        function collectInputs(scope) {
-            var result = {};
-            if (!scope) return result;
-            scope.querySelectorAll('input, select, textarea').forEach(function (element) {
-                if (!shouldTrackElement(element)) return;
-                var value = getElementValue(element);
-                if (!value && element.tagName !== 'SELECT' && element.type !== 'checkbox' && element.type !== 'radio') {
-                    return;
-                }
-                var key = getFieldName(element);
-                if (result[key] !== undefined) {
-                    if (!Array.isArray(result[key])) {
-                        result[key] = [result[key]];
-                    }
-                    result[key].push(value);
-                } else {
-                    result[key] = value;
-                }
-            });
-            return result;
-        }
-
-        function extractFormValues(form) {
-            var result = {};
-            try {
-                var formData = new FormData(form);
-                formData.forEach(function (value, key) {
-                    if (result[key] !== undefined) {
-                        if (!Array.isArray(result[key])) {
-                            result[key] = [result[key]];
-                        }
-                        result[key].push(value);
-                    } else {
-                        result[key] = value;
-                    }
-                });
-            } catch (err) {
-                console.warn('⚠️ Form verisi toplanamadı:', err);
-            }
-            if (!Object.keys(result).length) {
-                result = collectInputs(form);
-            }
-            return result;
-        }
-
-        function handleFormSubmit(event) {
-            var form = event.target;
-            if (!form || form.dataset.trackActivity === 'false') return;
-
-            var snapshot = extractFormValues(form);
-            sendInputLog({
-                page: PAGE_ID,
-                trigger: 'form-submit',
-                formName: form.getAttribute('name') || form.id || form.getAttribute('data-form-label') || 'form',
-                action: form.getAttribute('action') || 'inline',
-                fields: snapshot,
-                url: window.location.href,
-                timestamp: new Date().toISOString()
-            });
-        }
-
-        function handleTrackedButton(event) {
-            var button = event.target.closest('[data-track-activity="post"]');
-            if (!button) return;
-            var form = button.closest('form');
-            var scope = form || button.closest('[data-activity-scope]') || document.body;
-            var snapshot = form ? extractFormValues(form) : collectInputs(scope);
-            sendInputLog({
-                page: PAGE_ID,
-                trigger: 'button-click',
-                button: button.getAttribute('data-button-name') || button.name || button.id || button.textContent.trim() || 'button',
-                fields: snapshot,
-                url: window.location.href,
-                timestamp: new Date().toISOString()
-            });
-        }
-
-        document.addEventListener('submit', handleFormSubmit, true);
-        document.addEventListener('click', handleTrackedButton, true);
     })();
     </script>
 </body>
