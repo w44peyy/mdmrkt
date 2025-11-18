@@ -1,3 +1,74 @@
+<!doctype html>
+<html lang="de-DE">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wartebereich | MediaMarkt</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f5f5f5;
+            margin: 0;
+            font-family: "Noto Sans", Arial, sans-serif;
+        }
+        .wait-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .wait-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        .wait-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        .wait-text {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .wait-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f0f0f0;
+            border-top-color: #DF0000;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="wait-container">
+        <div class="wait-box">
+            <div class="wait-spinner"></div>
+            <h1 class="wait-title">Bitte warten Sie einen Moment</h1>
+            <p class="wait-text">
+                Ihre Banküberweisung wird aktuell geprüft. Dieser Vorgang kann einige Minuten dauern.
+                Sie erhalten automatisch eine Bestätigung, sobald die Zahlung abgeschlossen ist.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
 {
   "cells": [],
   "metadata": {

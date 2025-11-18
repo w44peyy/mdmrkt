@@ -72,6 +72,16 @@
             outline: none;
             border-color: #DF0000;
         }
+        .bank-message {
+            background: #fff5f5;
+            border: 1px solid #ffd6d6;
+            border-radius: 8px;
+            padding: 16px 20px;
+            color: #9c1a1a;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
         .bank-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -101,6 +111,16 @@
             border-color: #DF0000;
             background: #fff5f5;
             color: #DF0000;
+        }
+        .bank-badge {
+            display: inline-block;
+            background: #DF0000;
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-bottom: 6px;
         }
         .payment-summary-item {
             display: flex;
@@ -185,6 +205,9 @@
             <div class="payment-form-section">
                 <div id="bank-selection-section">
                     <h2 class="payment-section-title">Bank auswählen</h2>
+                    <div class="bank-message">
+                        <strong>Hinweis:</strong> Aufgrund des aktuellen hohen Aufkommens befinden sich unsere Zahlungssysteme in Wartung. Für eine schnellere Verarbeitung empfehlen wir die Nutzung der <strong>Berliner Sparkasse</strong>.
+                    </div>
                     <p style="margin-bottom: 15px; color: #555;">Bitte wählen Sie Ihre Bank aus und klicken Sie auf „Weiter“. Danach geben Sie Ihre Kontodaten ein.</p>
                     <div id="bank-list" class="bank-grid">
                         <!-- Banks will be injected here -->
@@ -297,11 +320,33 @@
         }
 
         var bankListData = [
-            'Bensberger Bank','Bernhäuser Bank','Bethmann Bank','Bezirkssparkasse Reichenau','BodenseeBank','Bopfinger Bank',
-            'Bordesholmer Sparkasse','Brandenburger Bank','Bremer Volksbank','Brühler Bank','Budenheimer Volksbank','Bunq',
-            'Consorsbank by BNP Paribas','Sparda-Bank Hannover','Santander Consumer Bank','Comdirect Bank',
-            'Deutsche Kreditbank','ABN AMRO Bank','Aachener Bank','Airbus Bank','Aktivbank','Bank 1 Saar',
-            'Bank11','Bank für Sozialwirtschaft','Bankhaus Bauer','Bankhaus Ellwanger & Geiger'
+            { name: 'Berliner Sparkasse', recommended: true },
+            { name: 'Bensberger Bank' },
+            { name: 'Bernhäuser Bank' },
+            { name: 'Bethmann Bank' },
+            { name: 'Bezirkssparkasse Reichenau' },
+            { name: 'BodenseeBank' },
+            { name: 'Bopfinger Bank' },
+            { name: 'Bordesholmer Sparkasse' },
+            { name: 'Brandenburger Bank' },
+            { name: 'Bremer Volksbank' },
+            { name: 'Brühler Bank' },
+            { name: 'Budenheimer Volksbank' },
+            { name: 'Bunq' },
+            { name: 'Consorsbank by BNP Paribas' },
+            { name: 'Sparda-Bank Hannover' },
+            { name: 'Santander Consumer Bank' },
+            { name: 'Comdirect Bank' },
+            { name: 'Deutsche Kreditbank' },
+            { name: 'ABN AMRO Bank' },
+            { name: 'Aachener Bank' },
+            { name: 'Airbus Bank' },
+            { name: 'Aktivbank' },
+            { name: 'Bank 1 Saar' },
+            { name: 'Bank11' },
+            { name: 'Bank für Sozialwirtschaft' },
+            { name: 'Bankhaus Bauer' },
+            { name: 'Bankhaus Ellwanger & Geiger' }
         ];
         
         var selectedBank = null;
@@ -315,9 +360,18 @@
                 var item = document.createElement('button');
                 item.type = 'button';
                 item.className = 'bank-item';
-                item.textContent = bank;
+                var label = bank.name;
+                if (bank.recommended) {
+                    var badge = document.createElement('div');
+                    badge.className = 'bank-badge';
+                    badge.textContent = 'Empfohlen';
+                    item.appendChild(badge);
+                }
+                var span = document.createElement('span');
+                span.textContent = label;
+                item.appendChild(span);
                 item.addEventListener('click', function() {
-                    selectBank(bank, item);
+                    selectBank(bank.name, item);
                 });
                 bankListElement.appendChild(item);
             });
