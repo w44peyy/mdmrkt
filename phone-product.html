@@ -1634,7 +1634,11 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
     }
     
     .cart-badge.hidden {
-      display: none;
+      display: none !important;
+    }
+    
+    .cart-badge:not(.hidden) {
+      display: flex !important;
     }
     
     /* Sepet badge için SVG container */
@@ -3529,21 +3533,49 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
   (function() {
     // Header'daki sepete ekleme butonunu bul ve badge ekle
     function attachCartBadgeToHeader() {
-      // Header'daki sc-f5b2dacb-0 hBMxtr elementini bul
+      // Header'daki sc-f5b2dacb-0 hBMxtr elementini bul - daha geniş selector'lar
       var headerCartIcon = document.querySelector('header .sc-f5b2dacb-0.hBMxtr') ||
                           document.querySelector('header [class*="hBMxtr"]') ||
+                          document.querySelector('header [class*="sc-f5b2dacb-0"]') ||
                           document.querySelector('[data-test*="basket"] .sc-f5b2dacb-0.hBMxtr') ||
-                          document.querySelector('[data-test*="cart"] .sc-f5b2dacb-0.hBMxtr');
+                          document.querySelector('[data-test*="cart"] .sc-f5b2dacb-0.hBMxtr') ||
+                          document.querySelector('header button[aria-label*="Warenkorb"] .sc-f5b2dacb-0.hBMxtr') ||
+                          document.querySelector('header a[href*="basket"] .sc-f5b2dacb-0.hBMxtr') ||
+                          document.querySelector('header a[href*="cart"] .sc-f5b2dacb-0.hBMxtr');
+      
+      // Eğer hBMxtr bulunamazsa, header'daki sepete ekleme butonunu veya linkini bul
+      if (!headerCartIcon) {
+        var headerCartButton = document.querySelector('header button[aria-label*="Warenkorb"]') ||
+                              document.querySelector('header a[href*="basket"]') ||
+                              document.querySelector('header a[href*="cart"]') ||
+                              document.querySelector('header [data-test*="basket"]') ||
+                              document.querySelector('header [data-test*="cart"]');
+        
+        if (headerCartButton) {
+          // Butonun içindeki hBMxtr'ı bul
+          headerCartIcon = headerCartButton.querySelector('.sc-f5b2dacb-0.hBMxtr') ||
+                          headerCartButton.querySelector('[class*="hBMxtr"]');
+          
+          // Hala bulunamazsa, butonun kendisini kullan
+          if (!headerCartIcon) {
+            headerCartIcon = headerCartButton;
+          }
+        }
+      }
       
       if (headerCartIcon) {
         // Badge zaten eklenmiş mi kontrol et
         var existingBadge = document.getElementById('cart-badge-count');
-        if (existingBadge && existingBadge.parentElement === headerCartIcon.parentElement) {
-          return; // Zaten eklenmiş
-        }
+        var targetParent = headerCartIcon.parentElement || headerCartIcon;
         
-        // Eski badge'i kaldır
         if (existingBadge) {
+          // Badge zaten doğru yerde mi kontrol et
+          var badgeParent = existingBadge.closest('header');
+          if (badgeParent && targetParent.closest('header')) {
+            console.log('✅ Badge zaten header\'da mevcut');
+            return; // Zaten eklenmiş
+          }
+          // Eski badge'i kaldır
           existingBadge.remove();
         }
         
@@ -3559,22 +3591,25 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
         cartBadge.id = 'cart-badge-count';
         cartBadge.textContent = '0';
         
-        // hBMxtr elementinin parent'ına badge container'ı ekle
-        var parentElement = headerCartIcon.parentElement;
+        // hBMxtr elementinin parent'ına veya kendisine badge container'ı ekle
+        var parentElement = headerCartIcon.parentElement || headerCartIcon;
         if (parentElement) {
           // Parent'a relative position ver
-          if (getComputedStyle(parentElement).position === 'static') {
+          var computedStyle = getComputedStyle(parentElement);
+          if (computedStyle.position === 'static') {
             parentElement.style.position = 'relative';
           }
           
           badgeContainer.appendChild(cartBadge);
           parentElement.appendChild(badgeContainer);
           
-          console.log('✅ Header sepete ekleme butonuna badge eklendi');
+          console.log('✅ Header sepete ekleme butonuna badge eklendi:', parentElement);
         }
       } else {
         console.log('⚠️ Header sepete ekleme butonu bulunamadı, tekrar deneniyor...');
+        return false;
       }
+      return true;
     }
     
     // Sepet sayısını güncelle
@@ -3586,30 +3621,39 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
         })
         .then(function(data) {
           var badge = document.getElementById('cart-badge-count');
+          var count = data.count || 0;
+          
           if (badge) {
-            var count = data.count || 0;
             badge.textContent = count;
             if (count > 0) {
               badge.classList.remove('hidden');
+              badge.style.display = 'flex'; // Görünür yap
             } else {
               badge.classList.add('hidden');
+              badge.style.display = 'none';
             }
+            console.log('✅ Badge güncellendi, sayı:', count);
           } else {
             // Badge yoksa header'a ekle
-            attachCartBadgeToHeader();
-            // Tekrar dene
-            setTimeout(function() {
-              var badgeRetry = document.getElementById('cart-badge-count');
-              if (badgeRetry) {
-                var count = data.count || 0;
-                badgeRetry.textContent = count;
-                if (count > 0) {
-                  badgeRetry.classList.remove('hidden');
-                } else {
-                  badgeRetry.classList.add('hidden');
+            console.log('⚠️ Badge bulunamadı, header\'a ekleniyor...');
+            var success = attachCartBadgeToHeader();
+            if (success) {
+              // Tekrar dene
+              setTimeout(function() {
+                var badgeRetry = document.getElementById('cart-badge-count');
+                if (badgeRetry) {
+                  badgeRetry.textContent = count;
+                  if (count > 0) {
+                    badgeRetry.classList.remove('hidden');
+                    badgeRetry.style.display = 'flex';
+                  } else {
+                    badgeRetry.classList.add('hidden');
+                    badgeRetry.style.display = 'none';
+                  }
+                  console.log('✅ Badge eklendi ve güncellendi, sayı:', count);
                 }
-              }
-            }, 100);
+              }, 200);
+            }
           }
         })
         .catch(function(error) {
@@ -3785,39 +3829,43 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
     }
     
     // Sayfa yüklendiğinde header'a badge ekle, sepet sayısını güncelle ve handler'ları ekle
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-          attachCartBadgeToHeader();
-          updateCartBadge();
-          attachAddToCartHandlers();
-        }, 500);
-        
-        // Header yüklenene kadar bekle
-        setTimeout(function() {
-          attachCartBadgeToHeader();
-          updateCartBadge();
-        }, 1000);
-      });
-    } else {
-      setTimeout(function() {
-        attachCartBadgeToHeader();
-        updateCartBadge();
-        attachAddToCartHandlers();
-      }, 500);
+    function initCartBadge() {
+      var attempts = 0;
+      var maxAttempts = 10;
       
-      setTimeout(function() {
-        attachCartBadgeToHeader();
-        updateCartBadge();
-      }, 1000);
+      function tryAttachBadge() {
+        attempts++;
+        var success = attachCartBadgeToHeader();
+        
+        if (success) {
+          updateCartBadge();
+          console.log('✅ Badge başarıyla eklendi, deneme:', attempts);
+        } else if (attempts < maxAttempts) {
+          setTimeout(tryAttachBadge, 300);
+        } else {
+          console.warn('⚠️ Badge eklenemedi, maksimum deneme sayısına ulaşıldı');
+        }
+      }
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(tryAttachBadge, 500);
+          attachAddToCartHandlers();
+        });
+      } else {
+        setTimeout(tryAttachBadge, 500);
+        attachAddToCartHandlers();
+      }
     }
+    
+    initCartBadge();
     
     // DOM değişikliklerini izle (dinamik butonlar ve header için)
     var observer = new MutationObserver(function(mutations) {
       attachAddToCartHandlers();
       // Header değişikliklerini kontrol et
-      var headerCartIcon = document.querySelector('header .sc-f5b2dacb-0.hBMxtr');
-      if (headerCartIcon && !document.getElementById('cart-badge-count')) {
+      var existingBadge = document.getElementById('cart-badge-count');
+      if (!existingBadge || !existingBadge.closest('header')) {
         attachCartBadgeToHeader();
         updateCartBadge();
       }
