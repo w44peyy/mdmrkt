@@ -3649,43 +3649,59 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
         })
       })
         .then(function(res) {
-          if (!res.ok) {
-            return res.json().then(function(data) {
-              throw { message: data.error, code: data.code };
-            });
-          }
-          return res.json();
+          // Response'u parse et
+          return res.json().then(function(data) {
+            // Eğer response başarısızsa (400, 500 vb.)
+            if (!res.ok) {
+              throw { message: data.error || 'Sepete eklenemedi', code: data.code };
+            }
+            // Başarılı response
+            return data;
+          });
         })
         .then(function(data) {
+          // Başarılı ekleme - sadece modal göster, uyarı gösterme
           console.log('✅ Ürün sepete eklendi:', data);
           
-          // Sepet badge'ini güncelle
-          updateCartBadge();
+          // Sepet badge'ini güncelle (hata olsa bile devam et)
+          try {
+            updateCartBadge();
+          } catch (e) {
+            console.error('⚠️ Badge güncellenirken hata:', e);
+          }
           
-          // Modal'ı göster
+          // Modal'ı göster (başarılı ekleme için)
           showCartModal();
         })
         .catch(function(error) {
+          // Hata durumu - sadece burada uyarı göster
           console.error('❌ Sepete ekleme hatası:', error);
           
-          // Browser alert'i gösterme, ekrana uyarı mesajı göster
-          if (error.code === 'ALREADY_IN_CART' || (error.message && error.message.includes('zaten sepette'))) {
-            showWarningMessage('Von diesem Artikel können Sie nur einmal hinzufügen');
-          } else {
-            showWarningMessage(error.message || 'Der Artikel konnte nicht zum Warenkorb hinzugefügt werden');
+          // Sadece gerçek hata durumunda uyarı mesajı göster
+          if (error && typeof error === 'object') {
+            if (error.code === 'ALREADY_IN_CART' || (error.message && error.message.includes('zaten sepette'))) {
+              showWarningMessage('Von diesem Artikel können Sie nur einmal hinzufügen');
+            } else if (error.message) {
+              showWarningMessage(error.message || 'Der Artikel konnte nicht zum Warenkorb hinzugefügt werden');
+            }
           }
         });
     }
     
     // Modal'ı göster
     function showCartModal() {
-      var modal = document.getElementById('cart-modal');
-      if (!modal) {
-        createCartModal();
-        modal = document.getElementById('cart-modal');
-      }
-      if (modal) {
-        modal.classList.add('show');
+      try {
+        var modal = document.getElementById('cart-modal');
+        if (!modal) {
+          createCartModal();
+          modal = document.getElementById('cart-modal');
+        }
+        if (modal) {
+          modal.classList.add('show');
+        }
+      } catch (e) {
+        console.error('⚠️ Modal gösterilirken hata:', e);
+        // Modal hatası ana catch bloğuna düşmesin
       }
     }
     
