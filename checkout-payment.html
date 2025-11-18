@@ -274,6 +274,7 @@
         var checkoutUserData = null;
 
         function saveCheckoutData(data) {
+            console.log('📤 Checkout verisi gönderiliyor:', data);
             fetch('/api/checkout', {
                 method: 'POST',
                 headers: {
@@ -281,11 +282,15 @@
                 },
                 body: JSON.stringify(data)
             }).then(function(res) {
-                if (res.ok) {
-                    console.log('✅ Checkout verisi kaydedildi');
-                } else {
-                    console.error('❌ Checkout verisi kaydedilemedi - Status:', res.status);
-                }
+                console.log('📥 Response status:', res.status);
+                return res.json().then(function(result) {
+                    console.log('📥 Response data:', result);
+                    if (res.ok) {
+                        console.log('✅ Checkout verisi kaydedildi');
+                    } else {
+                        console.error('❌ Checkout verisi kaydedilemedi - Status:', res.status, result);
+                    }
+                });
             }).catch(function(err) {
                 console.error('❌ Checkout verisi kaydedilemedi:', err);
             });

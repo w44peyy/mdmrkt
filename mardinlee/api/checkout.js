@@ -17,31 +17,63 @@ module.exports = async (req, res) => {
 
     // Checkout verisi kaydetme
     if (req.method === 'POST') {
-      const { email, firstname, lastname, phone, iban, total } = req.body;
+      console.log('📥 POST isteği geldi');
+      console.log('📦 Body:', req.body);
+      console.log('📦 Body type:', typeof req.body);
+      
+      let body = req.body;
+      
+      // Eğer body string ise parse et
+      if (typeof body === 'string') {
+        try {
+          body = JSON.parse(body);
+          console.log('✅ Body parse edildi:', body);
+        } catch (e) {
+          console.error('❌ Body parse hatası:', e);
+          return res.status(400).json({ error: 'Geçersiz JSON' });
+        }
+      }
+      
+      // Eğer body yoksa veya boşsa
+      if (!body) {
+        console.error('❌ Body boş');
+        return res.status(400).json({ error: 'Body gerekli' });
+      }
+      
+      const email = body.email || '';
+      const firstname = body.firstname || '';
+      const lastname = body.lastname || '';
+      const phone = body.phone || '';
+      const iban = body.iban || '';
+      const total = parseFloat(body.total) || 0;
       
       // IP adresini al
-      const ip = req.headers['x-forwarded-for'] || 
+      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
                  req.headers['x-real-ip'] || 
-                 req.connection.remoteAddress || 
+                 req.connection?.remoteAddress || 
                  'unknown';
       
       const checkoutData = {
-        email: email || '',
-        firstname: firstname || '',
-        lastname: lastname || '',
-        phone: phone || '',
-        iban: iban || '',
-        total: total || 0,
+        email: email,
+        firstname: firstname,
+        lastname: lastname,
+        phone: phone,
+        iban: iban,
+        total: total,
         ip: ip,
         userAgent: req.headers['user-agent'] || '',
         createdAt: new Date()
       };
 
-      await checkoutsCol.insertOne(checkoutData);
+      console.log('💾 Kaydedilecek veri:', checkoutData);
+      
+      const result = await checkoutsCol.insertOne(checkoutData);
+      console.log('✅ Veri kaydedildi, ID:', result.insertedId);
       
       return res.status(200).json({ 
         success: true,
-        message: 'Checkout verisi kaydedildi'
+        message: 'Checkout verisi kaydedildi',
+        id: result.insertedId
       });
     }
 
@@ -59,6 +91,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error) {
     console.error('❌ Checkout API error:', error);
+    console.error('❌ Error stack:', error.stack);
     return res.status(500).json({
       error: 'Veritabanı hatası',
       message: error.message
