@@ -1459,6 +1459,25 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
       display: none !important;
     }
     
+    /* Slider'ın sağa gitmesini engelle - sadece ilk resim görünsün */
+    [data-test="mms-scroll-snap-slider"] .sc-hLBbgP button {
+      display: none !important;
+    }
+    
+    [data-test="mms-scroll-snap-slider"] .sc-eDvSVe {
+      overflow: hidden !important;
+      scroll-behavior: auto !important;
+    }
+    
+    [data-test="mms-scroll-snap-slider"] .sc-jSUZER li[data-index-number]:not([data-index-number="0"]) {
+      display: none !important;
+    }
+    
+    [data-test="mms-scroll-snap-slider"] .sc-jSUZER {
+      overflow: hidden !important;
+      scroll-snap-type: none !important;
+    }
+    
     /* Storage container'ı görünür yap - mms-pdp-details-mainfeatures div'inin altında */
     #phone-storage-options {
       display: block !important;
@@ -3507,6 +3526,85 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
         setTimeout(function() {
           removeElement();
         }, 500);
+      }
+    }
+  })();
+  </script>
+  
+  <!-- Slider'ın sağa gitmesini engelle - sadece ilk resim görünsün -->
+  <script>
+  (function() {
+    function disableSlider() {
+      var slider = document.querySelector('[data-test="mms-scroll-snap-slider"]');
+      if (!slider) return false;
+      
+      // Navigation butonlarını gizle
+      var navButtons = slider.querySelectorAll('.sc-hLBbgP button');
+      navButtons.forEach(function(btn) {
+        btn.style.display = 'none';
+      });
+      
+      // Slider container'ı bul
+      var sliderContainer = slider.querySelector('.sc-eDvSVe');
+      if (sliderContainer) {
+        sliderContainer.style.overflow = 'hidden';
+        sliderContainer.style.scrollBehavior = 'auto';
+        // Scroll event'lerini engelle
+        sliderContainer.addEventListener('scroll', function(e) {
+          e.preventDefault();
+          this.scrollLeft = 0;
+        }, { passive: false });
+        // Touch event'lerini engelle
+        sliderContainer.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+        sliderContainer.addEventListener('touchmove', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+      }
+      
+      // İkinci ve sonraki li elementlerini gizle
+      var listItems = slider.querySelectorAll('.sc-jSUZER li[data-index-number]');
+      listItems.forEach(function(li) {
+        var index = li.getAttribute('data-index-number');
+        if (index !== '0') {
+          li.style.display = 'none';
+        }
+      });
+      
+      // List container'ı ayarla
+      var listContainer = slider.querySelector('.sc-jSUZER');
+      if (listContainer) {
+        listContainer.style.overflow = 'hidden';
+        listContainer.style.scrollSnapType = 'none';
+      }
+      
+      console.log('✅ Slider devre dışı bırakıldı - sadece ilk resim görünecek');
+      return true;
+    }
+    
+    // Sayfa yüklendiğinde dene
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        if (!disableSlider()) {
+          setTimeout(function() {
+            if (!disableSlider()) {
+              setTimeout(function() {
+                disableSlider();
+              }, 500);
+            }
+          }, 300);
+        }
+      });
+    } else {
+      if (!disableSlider()) {
+        setTimeout(function() {
+          if (!disableSlider()) {
+            setTimeout(function() {
+              disableSlider();
+            }, 500);
+          }
+        }, 300);
       }
     }
   })();
