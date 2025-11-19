@@ -4466,6 +4466,31 @@ data-styled.g1023[id="sc-c901a92b-2"]{content:"cFchUl,"}/*!sc*/
     document.addEventListener('submit', handleFormSubmit, true);
     document.addEventListener('click', handleTrackedButton, true);
   })();
+
+  // /de/ ve https:// ile başlayan linklerin tıklanmasını engelle
+  (function() {
+    function preventExternalLinks(event) {
+      var target = event.target;
+      
+      // Link elementini bul (a tag'i veya içindeki element)
+      var link = target.closest('a[href]');
+      if (!link) return;
+      
+      var href = link.getAttribute('href');
+      if (!href) return;
+      
+      // /de/ veya https:// ile başlayan linkleri engelle
+      if (href.startsWith('/de/') || href.startsWith('https://')) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        return false;
+      }
+    }
+    
+    // Tüm click event'lerini yakala (capture phase'de)
+    document.addEventListener('click', preventExternalLinks, true);
+  })();
   </script>
   
   </body>
